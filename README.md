@@ -30,8 +30,8 @@ The integrative pipeline for splicing analyses does:
 
 2. DEPENDENCIES
 
- * maptools (automatic buildout)
- * sjcount (automatic buildout)
+ * maptools (git clone from https://github.com/pervouchine/maptools)
+ * sjcount (git clone from https://github.com/pervouchine/sjcount)
  * samtools (needed by sjcount)
  * R-statistics (http://www.r-project.org/)
  * ggplot2 (http://ggplot2.org/)
@@ -39,6 +39,7 @@ The integrative pipeline for splicing analyses does:
 
  Note : sjcount requires samtools
 	a path to libbam.a of samtools has to be specified in the makefie of sjcount !!!
+ Note that $PATH has to include paths to maptools/bin/ and sjcount/
 
 3. INSTALLATION
 
