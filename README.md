@@ -32,9 +32,13 @@ The integrative pipeline for splicing analyses does:
 
  * maptools (automatic buildout)
  * sjcount (automatic buildout)
+ * samtools (needed by sjcount)
  * R-statistics (http://www.r-project.org/)
  * ggplot2 (http://ggplot2.org/)
  * Perl standard modules (http://www.perl.org/)
+
+ Note : sjcount requires samtools
+	a path to libbam.a of samtools has to be specified in the makefie of sjcount !!!
 
 3. INSTALLATION
 

@@ -1,5 +1,6 @@
 #!/usr/bin/perl
-use Perl::utils;
+use lib qw(/users/rg/dmitri/software/utils/);
+use utils;
 
 @suffixes = ('ssj','ssc');
 
@@ -8,6 +9,7 @@ if(@ARGV==0) {
 }
 
 parse_command_line(     dir     => {description=>'the output directory', ifabsent=>'output directory not specified'},
+			subdir  => {description=>'the repository subdirectory for bam files'},
 			param   => {description=>'parameters passed to sjcount'},
 			group	=> {description=>'the grouping field for IDR', ifabsent=>'grouping field is absent'},
 			block	=> {description=>'the blocking field for merge'},
@@ -42,6 +44,12 @@ while($line=<STDIN>) {
 
         @a = split /\//, $file;
         $target = pop(@a);
+
+        if($file=~/^http/ || $file=~/^ftp/) {
+            make(script=>"wget", before=>$file, output=>{-O=>"$dir$subdir$target"}, mkdir=>T, endpoint=>'download');
+            $file = "$dir$subdir$target";
+        }
+
         $target  =~ s/\.bam$//;
         $name = "$dir$target";
 
