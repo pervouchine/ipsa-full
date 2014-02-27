@@ -1,6 +1,7 @@
 DIR=data/
 
 all :: example_ipsa.mk
+	make -f example_ipsa.mk all	
 
 clean ::
 	rm -f -r example_ipsa.dat example_ipsa.mk
@@ -27,7 +28,4 @@ example_ipsa.dat :
 
 example_ipsa.mk : ${DIR}hg19.idx ${DIR}hg19.dbx ${DIR}hg19v18.gff example_ipsa.dat makefile
 	perl Perl/make.pl -repository input/ -dir output/ -group idrGroup -param '-read1 0' -annot ${DIR}hg19v18.gff -genome ${DIR}homSap19 -merge pooled < example_ipsa.dat > example_ipsa.mk
-
-
-
 

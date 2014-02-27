@@ -39,12 +39,13 @@ The integrative pipeline for splicing analyses does:
 
  Note : sjcount requires samtools
 	a path to libbam.a of samtools has to be specified in the makefie of sjcount !!!
- Note that $PATH has to include paths to maptools/bin/ and sjcount/
+ !!!!!!!!!!! Note that $PATH has to include paths to maptools/bin/ and sjcount/ !!!!!!!!!
 
 3. INSTALLATION
 
 	git clone https://github.com/pervouchine/ipsa
 	cd ipsa
+	./configure
 	make all
 
 4. EXAMPLES
