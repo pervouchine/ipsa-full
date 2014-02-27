@@ -8,8 +8,8 @@ if(@ARGV==0) {
     print STDERR "This utility creates a makefile for the sj pipeline, taking the index file from STDIN and printing the makefile to STDOUT\n";
 }
 
-parse_command_line(     dir     => {description=>'the output directory', ifabsent=>'output directory not specified'},
-			subdir  => {description=>'the repository subdirectory for bam files'},
+parse_command_line(     dir        => {description=>'the output directory', ifabsent=>'output directory not specified'},
+			repository => {description=>'the repository subdirectory for bam files'},
 			param   => {description=>'parameters passed to sjcount'},
 			group	=> {description=>'the grouping field for IDR', ifabsent=>'grouping field is absent'},
 			block	=> {description=>'the blocking field for merge'},
@@ -46,8 +46,8 @@ while($line=<STDIN>) {
         $target = pop(@a);
 
         if($file=~/^http/ || $file=~/^ftp/) {
-            make(script=>"wget", before=>$file, output=>{-O=>"$dir$subdir$target"}, mkdir=>T, endpoint=>'download');
-            $file = "$dir$subdir$target";
+            make(script=>"wget", before=>$file, output=>{-O=>"$repository$target"}, mkdir=>T, endpoint=>'download');
+            $file = "$repository$target";
         }
 
         $target  =~ s/\.bam$//;
