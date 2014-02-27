@@ -1,7 +1,7 @@
 DIR=data/
 
 all :: example_ipsa.mk
-	make -f example_ipsa.mk all	
+#	make -f example_ipsa.mk all	
 
 clean ::
 	rm -f -r example_ipsa.dat example_ipsa.mk
