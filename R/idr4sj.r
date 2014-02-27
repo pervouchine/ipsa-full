@@ -1,0 +1,66 @@
+# This is a translation of Alex Dobin's npIDR script (see funIDRnpFile.m) from matlab to R
+# Done on Jun 7, 2013 by Dmitri Pervouchine (dp@crg.eu)
+#
+# This is a version adopted for splice junction counts
+# To run this script from commandline you call 
+
+npIDR <- function(data) {
+    # input:  data matrix n-by-2
+    # output: column of npIDR
+    colnames(data) = c('V1','V2')
+
+    merge(count(data,'V1'),count(data,'V2'),by=1,all=T) -> absolute
+    absolute[is.na(absolute)] <- 0
+    absolute$sum = absolute$freq.x + absolute$freq.y
+
+    merge(count(subset(data,V2==0),'V1'), count(subset(data,V1==0),'V2'), by=1,all=T) -> conditional
+    conditional[is.na(conditional)] <- 0
+    conditional$sum = conditional$freq.x + conditional$freq.y
+
+    subset(merge(absolute, conditional, by=1, all=T), V1>0) -> matr
+    matr[is.na(matr)] <- 0
+    npIDR=matr$sum.y/matr$sum.x
+    names(npIDR) = matr$V1
+
+    sPool = apply(data, 1, sum)
+    output = npIDR[as.character(sPool)]
+    output[is.na(output)]<-0
+    round(output, digits=4)
+}
+
+
+library(plyr)
+cmd_args = commandArgs()[-(1:5)]
+idr_default = 0
+
+data = list()
+for(i in 1:(length(cmd_args)-1)) {
+    print(paste('Replicate', cmd_args[i]))
+    data[[i]] = read.delim(cmd_args[i], header=F) # read bed, replicate 1
+    data[[i]]$V4=='.'
+}
+
+if(length(cmd_args)==2) {
+    A = data[[1]]
+    A$idr = idr_default
+}
+
+if(length(cmd_args)>2) {
+    merge(data[[1]], data[[2]], by=intersect(c(1,2,3,4,6,10,11),1:ncol(data[[1]])), all=T) -> A    # merge and replace NAs by 0
+    A[is.na(A)] <- 0
+    npIDR(A[,c('V7.x','V7.y')]) -> A$idr
+    A$V4 = '.'
+    A$V5 = round(100*log2(A$V7.x + A$V7.y), digits=0)
+    A$V5[A$V5>1000] <- 1000
+    A$V7 = A$V7.x + A$V7.y
+    A$V8 = A$V8.x + A$V8.y
+    A$V9 = A$V9.x + A$V9.y
+}
+
+print(paste('Saving to', cmd_args[length(cmd_args)]))
+write.table(A[,c(colnames(data[[1]]), 'idr')], file=cmd_args[length(cmd_args)], col.names=F, row.names=F, quote=F, sep="\t")
+
+#    pdf(p$qc)
+#    library(ggplot2)
+#    ggplot(A[sample(nrow(A),N),], aes(x=V7.x, y=V7.y, colour=idr)) + geom_point() + scale_x_log10() + scale_y_log10() + ggtitle(cmd_args[8]) + xlab("R1") + ylab("R2")
+#    dev.off()
