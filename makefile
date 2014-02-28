@@ -2,7 +2,7 @@ DIR=data/
 
 ###############################################################################################
 
-install :: sjcount/sjcount maptools/bin/transf maptools/bin/getsegm
+all :: sjcount/sjcount maptools/bin/transf maptools/bin/getsegm
 
 sjcount/sjcount : 
 	git clone https://github.com/pervouchine/sjcount
@@ -18,11 +18,14 @@ clean ::
 
 ###############################################################################################
 
-all :: install example.mk
-#	make -f example.mk all	
+all :: example.mk
 
+run ::	example.mk
+	make -f example.mk all  
 clean ::
 	rm -f -r example.dat example.mk
+
+###############################################################################################
 
 ${DIR}gencode.v18.annotation.gtf :
 	mkdir -p ${DIR}
