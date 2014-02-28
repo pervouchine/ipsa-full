@@ -18,11 +18,11 @@ clean ::
 
 ###############################################################################################
 
-all :: install example_ipsa.mk
-	make -f example_ipsa.mk all	
+all :: install example.mk
+#	make -f example.mk all	
 
 clean ::
-	rm -f -r example_ipsa.dat example_ipsa.mk
+	rm -f -r example.dat example.mk
 
 ${DIR}gencode.v18.annotation.gtf :
 	mkdir -p ${DIR}
@@ -41,9 +41,9 @@ ${DIR}hg19.idx ${DIR}hg19.dbx : ${DIR}chr1.fa
 ${DIR}hg19v18.gff : ${DIR}gencode.v18.annotation.gtf
 	perl Perl/transcript_elements.pl -gtf ${DIR}gencode.v18.annotation.gtf > ${DIR}hg19v18.gff
 
-example_ipsa.dat : 
-	wget http://genome.crg.eu/~dmitri/export/ipsa/example_ipsa.dat -O example_ipsa.dat
+example.dat : 
+	wget http://genome.crg.eu/~dmitri/export/ipsa/example_ipsa.dat -O example.dat
 
-example_ipsa.mk : ${DIR}hg19.idx ${DIR}hg19.dbx ${DIR}hg19v18.gff example_ipsa.dat makefile
-	perl Perl/make.pl -repository input/ -dir output/ -group idrGroup -param '-read1 0' -annot ${DIR}hg19v18.gff -genome ${DIR}homSap19 -merge pooled < example_ipsa.dat > example_ipsa.mk
+example.mk : ${DIR}hg19.idx ${DIR}hg19.dbx ${DIR}hg19v18.gff example.dat makefile
+	perl Perl/make.pl -repository input/ -dir output/ -group idrGroup -param '-read1 0' -annot ${DIR}hg19v18.gff -genome ${DIR}homSap19 -merge pooled < example.dat > example.mk
 
