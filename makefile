@@ -1,7 +1,25 @@
 DIR=data/
 
-all :: example_ipsa.mk
-#	make -f example_ipsa.mk all	
+###############################################################################################
+
+install :: sjcount/sjcount maptools/bin/transf maptools/bin/getsegm
+
+sjcount/sjcount : 
+	git clone https://github.com/pervouchine/sjcount
+	make -C sjcount/ all
+
+maptools/bin/transf maptools/bin/getsegm:
+	git clone https://github.com/pervouchine/maptools
+	mkdir -p maptools/bin/
+	make -C maptools/ all
+
+clean ::
+	rm -f -r sjcount/ maptools/
+
+###############################################################################################
+
+all :: install example_ipsa.mk
+	make -f example_ipsa.mk all	
 
 clean ::
 	rm -f -r example_ipsa.dat example_ipsa.mk
