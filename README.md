@@ -20,6 +20,12 @@ along with 'ipsa' package.  If not, see <http://www.gnu.org/licenses/>.
 
 Integrative pipeline for splicing analyses (IPSA)
 
+0. DISCLAIMER
+ 
+  Software and documentation in this release are very preliminary.
+  Currently the pipeline is configured to download a few BAM files
+  and run all computations for them, as an example. 
+
 1. SYNOPSIS
 
 The integrative pipeline for splicing analyses does:
