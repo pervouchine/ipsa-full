@@ -33,6 +33,7 @@ ${DIR}chr1.fa :
 	mkdir -p ${DIR}
 	wget http://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/chromFa.tar.gz -O ${DIR}chromFa.tar.gz
 	tar -xf ${DIR}chromFa.tar.gz -C ${DIR}
+	rm -f ${DIR}chromFa.tar.gz 
 
 ${DIR}hg19.idx ${DIR}hg19.dbx : ${DIR}chr1.fa
 	mkdir -p ${DIR}
