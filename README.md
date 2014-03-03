@@ -43,6 +43,7 @@ Integrative pipeline for splicing analyses (IPSA)
  * Perl standard modules (http://www.perl.org/)
 
 * INSTALLATION
+  To install
 
 	git clone https://github.com/pervouchine/ipsa
 	cd ipsa
