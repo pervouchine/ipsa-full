@@ -20,13 +20,13 @@ along with 'ipsa' package.  If not, see <http://www.gnu.org/licenses/>.
 
 Integrative pipeline for splicing analyses (IPSA)
 
-. DISCLAIMER
+* DISCLAIMER
  
   Software and documentation in this release are very preliminary.
   Currently the pipeline is configured to download a few BAM files
   and run all computations for them, as an example. 
 
-. SYNOPSIS
+* SYNOPSIS
 
 The integrative pipeline for splicing analyses does:
 
@@ -34,7 +34,7 @@ The integrative pipeline for splicing analyses does:
  * Calculation of splicing indices, exon- and intron-centric
  * Analysis of micro-exons and local splice-graph structure
 
-. DEPENDENCIES
+* DEPENDENCIES
 
  * maptools (automatic from https://github.com/pervouchine/maptools)
  * sjcount (automatic from https://github.com/pervouchine/sjcount)
@@ -43,19 +43,19 @@ The integrative pipeline for splicing analyses does:
  * ggplot2 (http://ggplot2.org/)
  * Perl standard modules (http://www.perl.org/)
 
-. INSTALLATION
+* INSTALLATION
 
 	git clone https://github.com/pervouchine/ipsa
 	cd ipsa
 	make all
 
-. EXAMPLES
+* EXAMPLES
 
 An example of a pipeline buildout is available by running
 
 	make -f example.mk all
 
-. DOCUMENTATION 
+* DOCUMENTATION 
 
 The documentation on the pipeline components is available in latex/ subdirectory
 The documentation on the sjcount utility is available in sjcount/latex/ subdirectory
