@@ -49,5 +49,5 @@ example.dat :
 	wget http://genome.crg.eu/~dmitri/export/ipsa/example_ipsa.dat -O example.dat
 
 example.mk : ${DIR}hg19.idx ${DIR}hg19.dbx ${DIR}hg19v18.gff example.dat makefile
-	perl Perl/make.pl -repository input/ -dir output/ -group idrGroup -param '-read1 0' -annot ${DIR}hg19v18.gff -genome ${DIR}homSap19 -merge pooled < example.dat > example.mk
+	perl Perl/make.pl -repository input/ -dir output/ -group idrGroup -param '-read1 0' -annot ${DIR}hg19v18.gff -genome ${DIR}hg19 -merge pooled < example.dat > example.mk
 
