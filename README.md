@@ -27,8 +27,7 @@ Integrative pipeline for splicing analyses (IPSA)
   and run all computations for them, as an example. 
 
 * SYNOPSIS
-
-The integrative pipeline for splicing analyses does:
+ The integrative pipeline for splicing analyses does:
 
  * Quantification of splice junctions and splice boundaries
  * Calculation of splicing indices, exon- and intron-centric
