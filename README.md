@@ -18,7 +18,7 @@ along with 'ipsa' package.  If not, see <http://www.gnu.org/licenses/>.
 
 ============================================================================
 
-Integrative pipeline for splicing analyses (IPSA)
+Integrative Pipeline for Splicing Analyses (IPSA)
 
 * DISCLAIMER
  
@@ -43,7 +43,8 @@ Integrative pipeline for splicing analyses (IPSA)
  * Perl standard modules (http://www.perl.org/)
 
 * INSTALLATION
-  To install
+
+  To install, do
 
 	git clone https://github.com/pervouchine/ipsa
 	cd ipsa
