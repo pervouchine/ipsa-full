@@ -27,6 +27,7 @@ Integrative Pipeline for Splicing Analyses (IPSA)
   and run all computations for them, as an example. 
 
 * SYNOPSIS
+
 The integrative pipeline for splicing analyses does:
 
  * Quantification of splice junctions and splice boundaries
@@ -43,6 +44,7 @@ The integrative pipeline for splicing analyses does:
  * Perl standard modules (http://www.perl.org/)
 
 * INSTALLATION
+
 To install, do
 
 	git clone https://github.com/pervouchine/ipsa
