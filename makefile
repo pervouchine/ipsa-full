@@ -1,4 +1,5 @@
 DIR=data/
+EXPORT=ipsa-v0.1
 
 ###############################################################################################
 
@@ -50,4 +51,19 @@ example.dat :
 
 example.mk : ${DIR}hg19.idx ${DIR}hg19.dbx ${DIR}hg19v18.gff example.dat makefile
 	perl Perl/make.pl -repository input/ -dir output/ -group idrGroup -param '-read1 0' -annot ${DIR}hg19v18.gff -genome ${DIR}hg19 -merge pooled < example.dat > example.mk
+
+###############################################################################################
+
+${EXPORT}.tar.gz export : 
+	mkdir -p ${EXPORT}/
+	cp -r Perl/ ${EXPORT}/
+	cp -r R/  ${EXPORT}/
+	cp -r latex/ ${EXPORT}/
+	cp -f LICENSE ${EXPORT}/
+	cp -f VERSION ${EXPORT}/
+	cp -f makefile ${EXPORT}/
+	cp -f README.md ${EXPORT}/
+	tar -cf ${EXPORT}.tar ${EXPORT}/
+	gzip ${EXPORT}.tar
+	rm -f -r ${EXPORT}/
 

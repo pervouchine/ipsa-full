@@ -10,7 +10,7 @@ if(@ARGV==0) {
 }
 
 parse_command_line(	bed	=> {description=>'the input file', ifunreadable=>'input not specified'},
-			annot	=> {description=>'the annotation (gtf)', ifunreadable=>'annotation not specified'}, 
+			annot	=> {description=>'the annotation (gff)', ifunreadable=>'annotation not specified'}, 
 			dbx	=> {description=>'the genome (dbx)', ifunreadable=>'dbx not specified'},
                         idx     => {description=>'the genome (idx)', ifunreadable=>'idx not specified'});
 
