@@ -23,6 +23,8 @@ parse_command_line(     dir        => {description=>'the output directory', ifab
 @group = split /\,/, $group;
 @block = split /\,/, $block;
 
+print "include makefile\n";
+
 while($line=<STDIN>) {
     chomp $line;
     ($file, $attr) = split /\t/, $line;
@@ -52,7 +54,7 @@ while($line=<STDIN>) {
         $target  =~ s/\.bam$//;
         $name = "$dir$target";
 
-	make(script=>"sjcount/sjcount", input=>{-bam=>$file}, output=>{-ssj=>"$name.A01.ssj.tsv", -ssc=>"$name.A01.ssc.tsv"}, 
+	make(script=>"\${SJCOUNTDIR}sjcount", input=>{-bam=>$file}, output=>{-ssj=>"$name.A01.ssj.tsv", -ssc=>"$name.A01.ssc.tsv"}, 
 	     after=>"-log $name.A01.ssj.log -binsize 1 -nbins $readLength $param $stranded -quiet", endpoint=>'A01',mkdir=>T);
 
 	make(script=>"aggregate.pl", input=>{-tsv=>"$name.A01.ssj.tsv"}, output=>{'>'=>"$name.A02.ssj.bed"}, before=>"-readLength $readLength -margin $margin -minintron 4", endpoint=>'A02');

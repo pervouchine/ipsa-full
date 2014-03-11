@@ -1,21 +1,27 @@
 DIR=data/
 EXPORT=ipsa-v0.1
+MAPTOOLSDIR=maptools-1.0/
+SJCOUNTDIR=sjcount-1.0/
 
 ###############################################################################################
 
-all :: sjcount/sjcount maptools/bin/transf maptools/bin/getsegm
+all :: ${SJCOUNTDIR}sjcount ${MAPTOOLSDIR}bin/transf ${MAPTOOLSDIR}bin/getsegm
 
-sjcount/sjcount : 
-	git clone https://github.com/pervouchine/sjcount
-	make -C sjcount/ all
+${SJCOUNTDIR}sjcount : 
+	wget https://github.com/pervouchine/sjcount/archive/v1.0.tar.gz
+	tar -xf v1.0
+	rm -f v1.0
+	make -C ${SJCOUNTDIR} all
 
-maptools/bin/transf maptools/bin/getsegm:
-	git clone https://github.com/pervouchine/maptools
-	mkdir -p maptools/bin/
-	make -C maptools/ all
+${MAPTOOLSDIR}bin/transf ${MAPTOOLSDIR}bin/getsegm:
+	wget https://github.com/pervouchine/maptools/archive/v1.0.tar.gz
+	tar -xf v1.0
+	rm -f v1.0
+	mkdir -p ${MAPTOOLSDIR}bin/
+	make -C ${MAPTOOLSDIR} all
 
 clean ::
-	rm -f -r sjcount/ maptools/
+	rm -f -r ${SJCOUNTDIR} ${MAPTOOLSDIR}
 
 ###############################################################################################
 
@@ -41,7 +47,7 @@ ${DIR}chr1.fa :
 
 ${DIR}hg19.idx ${DIR}hg19.dbx : ${DIR}chr1.fa
 	mkdir -p ${DIR}
-	maptools/bin/transf -dir ${DIR}chr1.fa -idx ${DIR}hg19.idx -dbx ${DIR}hg19.dbx
+	${MAPTOOLSDIR}bin/transf -dir ${DIR}chr1.fa -idx ${DIR}hg19.idx -dbx ${DIR}hg19.dbx
 
 ${DIR}hg19v18.gff : ${DIR}gencode.v18.annotation.gtf
 	perl Perl/transcript_elements.pl -gtf ${DIR}gencode.v18.annotation.gtf > ${DIR}hg19v18.gff
