@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 use Perl::utils;
 
-$program = "~/software/maptools/bin/getsegm -limit 4 -margins -1 0 -spacer 0 -type 1";
+$program = "maptools-1.0/bin/getsegm -limit 4 -margins -1 0 -spacer 0 -type 1";
 
 if(@ARGV==0) {
     print STDERR "This utility takes an aggregated BED6+3 file (STDIN), the genomic annotation, and the genome, and outputs BED6+3+2 (STDOUT) with two more columns: ";

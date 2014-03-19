@@ -8,7 +8,7 @@ if(@ARGV==0) {
 }
 
 parse_command_line(     dir     => {description=>'the output directory', ifabsent=>'output directory not specified'},
-			subdir  => {description=>'the repository subdirectory for bam files'},
+			repository => {description=>'the repository subdirectory for bam files'},
 			param   => {description=>'parameters passed to sjcount'},
 			group	=> {description=>'the grouping field for IDR', ifabsent=>'grouping field is absent'},
 			block	=> {description=>'the blocking field for mastertable'},
@@ -45,8 +45,8 @@ while($line=<STDIN>) {
         $target = pop(@a);
 
         if($file=~/^http/ || $file=~/^ftp/) {
-            make(script=>"wget", before=>$file, output=>{-O=>"$dir$subdir$target"}, mkdir=>T, endpoint=>'download');
-            $file = "$dir$subdir$target";
+            make(script=>"wget", before=>$file, output=>{-O=>"$repository$target"}, mkdir=>T, endpoint=>'download');
+            $file = "$repository$target";
         }
 
         $target  =~ s/\.bam$//;
