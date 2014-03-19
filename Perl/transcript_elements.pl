@@ -2,14 +2,12 @@
 use Perl::utils;
 
 if(@ARGV==0) {
-    print STDERR "This utility takes a gtf annotation and reformats it into a more compact, quickly readable file. Only exons are taken into account.\n";
+    print STDERR "This utility takes a gtf annotation (STDIN) and reformats it into a more compact, quickly readable file (STDOUT). Only exons are taken into account.\n";
 }
 
-parse_command_line(gtf=> {description=>'the input file', ifunreadable=>'input not specified'},
-		   source=>{description=>'the content of the source field', default=>'SJPIPE'});
+parse_command_line(source=>{description=>'the content of the source field', default=>'SJPIPE'});
 
-open FILE, $gtf || die;
-while($line=<FILE>) {
+while($line=<STDIN>) {
     chomp $line;
     ($chr, $trash, $element, $beg, $end, $trash, $str, $trash, $attr) = split /\t/, $line;
     $chr = "chr$chr" unless($chr=~/^chr/);

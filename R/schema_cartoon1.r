@@ -22,7 +22,7 @@ b = 50
 layout(matrix(c(0,5,0,2,1,3,0,4,0),3,3,byrow=T), widths=c(1,2,1),heights=c(1,2,1))
 
 x=seq(0,1,0.02)
-plot(x,x*(1-x),'l',lty=2,xlab='mean',ylab='var') + with(Q,points(mean, var, col=col, pch=19,cex=0.1))
+plot(x,x*(1-x),'l',lty=2,xlab='mean',ylab='variance') + with(Q,points(mean, var, col=col, pch=19,cex=0.1))
 
 fr <- function(x) {c(x,0,1)}
 

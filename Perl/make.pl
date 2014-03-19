@@ -7,11 +7,11 @@ if(@ARGV==0) {
     print STDERR "This utility creates a makefile for the sj pipeline, taking the index file from STDIN and printing the makefile to STDOUT\n";
 }
 
-parse_command_line(     dir        => {description=>'the output directory', ifabsent=>'output directory not specified'},
-			repository => {description=>'the repository subdirectory for bam files'},
+parse_command_line(     dir     => {description=>'the output directory', ifabsent=>'output directory not specified'},
+			subdir  => {description=>'the repository subdirectory for bam files'},
 			param   => {description=>'parameters passed to sjcount'},
 			group	=> {description=>'the grouping field for IDR', ifabsent=>'grouping field is absent'},
-			block	=> {description=>'the blocking field for merge'},
+			block	=> {description=>'the blocking field for mastertable'},
 			margin  => {description=>'margin for aggregate', default=>5},
 			entropy => {description=>'entropy lower threshold', default=>3},
 			mincount=> {description=>'min number of counts for the denominator', default=>20},
@@ -22,8 +22,6 @@ parse_command_line(     dir        => {description=>'the output directory', ifab
 
 @group = split /\,/, $group;
 @block = split /\,/, $block;
-
-print "include makefile\n";
 
 while($line=<STDIN>) {
     chomp $line;
@@ -47,22 +45,22 @@ while($line=<STDIN>) {
         $target = pop(@a);
 
         if($file=~/^http/ || $file=~/^ftp/) {
-            make(script=>"wget", before=>$file, output=>{-O=>"$repository$target"}, mkdir=>T, endpoint=>'download');
-            $file = "$repository$target";
+            make(script=>"wget", before=>$file, output=>{-O=>"$dir$subdir$target"}, mkdir=>T, endpoint=>'download');
+            $file = "$dir$subdir$target";
         }
 
         $target  =~ s/\.bam$//;
         $name = "$dir$target";
 
-	make(script=>"\${SJCOUNTDIR}sjcount", input=>{-bam=>$file}, output=>{-ssj=>"$name.A01.ssj.tsv", -ssc=>"$name.A01.ssc.tsv"}, 
+	make(script=>"sjcount", input=>{-bam=>$file}, output=>{-ssj=>"$name.A01.ssj.tsv", -ssc=>"$name.A01.ssc.tsv"}, 
 	     after=>"-log $name.A01.ssj.log -binsize 1 -nbins $readLength $param $stranded -quiet", endpoint=>'A01',mkdir=>T);
 
-	make(script=>"aggregate.pl", input=>{-tsv=>"$name.A01.ssj.tsv"}, output=>{'>'=>"$name.A02.ssj.bed"}, before=>"-readLength $readLength -margin $margin -minintron 4", endpoint=>'A02');
-        make(script=>"aggregate.pl", input=>{-tsv=>"$name.A01.ssc.tsv"}, output=>{'>'=>"$name.A02.ssc.bed"}, before=>"-readLength $readLength -margin $margin -minintron 0", endpoint=>'A02');
+	make(script=>"aggregate.pl", input=>{'<'=>"$name.A01.ssj.tsv"}, output=>{'>'=>"$name.A02.ssj.bed"}, before=>"-readLength $readLength -margin $margin -minintron 4", endpoint=>'A02');
+        make(script=>"aggregate.pl", input=>{'<'=>"$name.A01.ssc.tsv"}, output=>{'>'=>"$name.A02.ssc.bed"}, before=>"-readLength $readLength -margin $margin -minintron 0", endpoint=>'A02');
 
-	make(script=>"annotate.pl",  input=>{-bed=>"$name.A02.ssj.bed", -annot=>$annot, -dbx=>"$genome.dbx", -idx=>"$genome.idx"}, output=>{'>'=>"$name.B03.ssj.bed"}, endpoint=>'B03');
-	make(script=>"choose_strand.pl", input=>{-bed=>"$name.B03.ssj.bed"}, output=>{'>'=>"$name.B04.ssj.bed"}, endpoint=>'B04');
-	make(script=>"constrain_ssc.pl", input=>{-ssc=>"$name.A02.ssc.bed",-ssj=>"$name.B04.ssj.bed"}, output=>{'>'=>"$name.B04.ssc.bed"}, endpoint=>'B04');	
+	make(script=>"annotate.pl",  input=>{'<'=>"$name.A02.ssj.bed", -annot=>$annot, -dbx=>"$genome.dbx", -idx=>"$genome.idx"}, output=>{'>'=>"$name.B03.ssj.bed"}, endpoint=>'B03');
+	make(script=>"choose_strand.pl", input=>{'<'=>"$name.B03.ssj.bed"}, output=>{'>'=>"$name.B04.ssj.bed"}, before=>"-", endpoint=>'B04');
+	make(script=>"constrain_ssc.pl", input=>{'<'=>"$name.A02.ssc.bed",-ssj=>"$name.B04.ssj.bed"}, output=>{'>'=>"$name.B04.ssc.bed"}, endpoint=>'B04');	
 
 	foreach $suff(@suffixes) {
 	    push @{$IDR{$id}{$suff}}, "$name.B04.$suff.bed";
@@ -107,4 +105,5 @@ foreach $key(keys(%tx_merge_cl)) {
     print "$dir$name.txpsi.tsv : @{$tx_merge_mk{$key}}\n\tperl Perl/merge_gff.pl @{$tx_merge_cl{$key}} -o psi $dir$name.txpsi.tsv\n";
     print "all :: $dir$name.txpsi.tsv\n";
 }
+
 

@@ -178,17 +178,17 @@ In the ssc file begin=end=position of splice site
 %%%%%%%%%%%%%
 
 \subsubsection{Aggregating SJ counts over offsets}
-The \prog{aggregate.pl} utility takes the output of \prog{sjcount} and performs aggregation by the 5th column (offset) using three different aggregation functions 
+The \prog{aggregate.pl} utility takes the output of \prog{sjcount} on STDIN and performs aggregation by the 5th column (offset) using three different aggregation functions 
 (see examples below). It outputs a BED6+3 file with three extra columns being (7) total count, (8) staggered read count, (9) entropy. The output is sent to \prog{stdout}. 
 \begin{verbatim}
-aggregate.pl -tsv <file>  ...
-Input:	TSV file (ssj or ssc), the output of sjcount
-Output:	BED6+3
+aggregate.pl   
+Input:  TSV file (ssj or ssc) on STDIN
+Output: BED6+3 on STDOUT
 Options:
-	-maxintron, max intron length, default=0
-        -minintron, min intron length, default=0
-        -readLength, the read length, default=0
-        -margin, the margin for offset, default=0
+	-margin ..., the margin for offset, default=0
+	-maxintron ..., max intron length, default=0
+	-minintron ..., min intron length, default=0
+	-readLength ..., the read length, default=0
 
 Columns in the output are: chr, begin, end, name, score, strand, 
 	count, staggered, entropy
@@ -228,13 +228,15 @@ where $536=100*\log_2(41)$ and $1.28$ is the entropy of the distribution.
 
 \subsubsection[Annotation status and splice site nucleotides]{Checking the annotation status of a SJ and retrieving splice site nucleotides}
 \label{sec::annotation_status}
-The \prog{annotate.pl} takes an aggregated BED6+3 file (i.e., the output of \prog{aggregate.pl}), the genomic annotation, and the genome, and outputs BED6+5 
+The \prog{annotate.pl} takes an aggregated BED6+3 file (i.e., the output of \prog{aggregate.pl}) on STDIN, the genomic annotation, and the genome, and outputs BED6+5 
 with two more columns: (10) the annotation status and (11) splice sites. The output is sent to \prog{stdout}.
 \begin{verbatim}
-annotate.pl -bed <file> -annot <file> -idx <file> -dbx <dbx>
-Input:  BED file (the output of aggregate.pl)
-	annotation (gtf), a pre-processed genomic annotation (gtf)
-	genome (-idx and -dbx), see maptools package
+annotate.pl
+Input:  BED6+3 file (the output of aggregate.pl) on STDIN
+        -annot ..., the annotation (gff), obligatory
+        -dbx ..., the genome (dbx), obligatory
+        -idx ..., the genome (idx), obligatory
+Outout: BED6+5 on STDOUT
 \end{verbatim}
 The annotation file is a simplified, processed form of the standard annotation gtf. It can be obtained by the \prog{transcript\_elements.pl} utility (see section~\ref{sec::preprocessing}).
 The genome consists of two compressed files, *.dbx and *.idx, which can be obtained from the genomic fasta sequence by using \prog{transf} utility of the \prog{maptools} package. 
@@ -270,7 +272,12 @@ Note that sequence retriever uses the \prog{getsegm} program of the \prog{maptoo
 \subsubsection{Strand choice}
 At this step, a unique value of strand is chosen for each SJ. This is done by \prog{choose\_strand.pl} utility. 
 \begin{verbatim}
-choose_strand.pl -bed <file>
+choose_strand.pl
+Input:  BED6+5 file on STDIN
+Output: BED6+5 file on STDOUT
+Options:
+	-annot ..., annotation column, default=10
+	-sites ..., splice site column, default=11
 \end{verbatim}
 For each combination of chromosome, begin, and end, the strand with greater annotation status (see section~\ref{sec::annotation_status}) is chosen. In case of 
 a tie (usually $0$ on both strands), the strand is chosen based on the ``largest'' splice site nucleotides in terms of lexicographic order (TTTT$>$GTAG$>\dots$).
@@ -299,7 +306,10 @@ chr1   150   200   .     439    +     21    2     1.01   0     GTAG
 Since now a unique value of strand is chosen for each SJ, the counts of reads overlapping splice sites have to be constrained to a smaller set of splice sites.
 This is done by \prog{constrain\_ssc.pl} utility.
 \begin{verbatim}
-constrain_ssc.pl -ssj <file> -ssc <file> 
+constrain_ssc.pl
+Input:  BED6+3 ssc (reads overlapping splice sites) on STDIN
+	-ssj ..., input ssj (bed) file, obligatory
+Output: BED6+3 on STDOUT
 \end{verbatim}
 Here -ssj is the BED file after strand choice was made, -ssc is the output of \prog{sjcount}. The output of \prog{constrain\_ssc.pl}is sent to \prog{stdout}. 
 If the ssc input is unstranded, then the strand of a splice site is taken from ssj, where the strand is already defined. In some cases it will lead to two 
@@ -436,8 +446,6 @@ frequencies of splice site nucleotides. This is done by \prog{sjstat.r} utility.
 \begin{verbatim}
 R/sjstat.r <file.bed>  >  <file.log>
 \end{verbatim}
-
-
 
 \bibliographystyle{plain}
 \bibliography{sjpipeline}

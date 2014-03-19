@@ -117,6 +117,7 @@ sub make {
     }
     print "\t$param{'script'} ",join(" ", $param{'before'}, %{$param{'input'}}, $param{'between'}, %{$param{'output'}}, $param{'after'})," \n";
     print "$param{'endpoint'} :: ", join(" ", values(%{$param{'output'}})), "\n" if($param{'endpoint'});
+    print "rm-$param{'endpoint'} ::\n\t rm -f ", join(" ", values(%{$param{'output'}})), "\n" if($param{'endpoint'});
 }
 
 ################################################################################################################################################
@@ -158,5 +159,11 @@ sub progressbar {
         print STDERR "\] ",($current/$last < 0.1 ? " " : ""), int(100*$current/$last),"%";
     }
     print STDERR "\n" if($current==$last);
+}
+
+sub sum {
+    my $s=0;
+    foreach my $x(@_) {$s+=$x;}
+    return($s);
 }
 

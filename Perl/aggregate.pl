@@ -2,20 +2,17 @@
 use Perl::utils;
 
 if(@ARGV==0) {
-    print STDERR "This utility aggregates tsv output of sjcount by the 5th column (offset) and outputs BED6+3 with three extra columns being ";
+    print STDERR "This utility aggregates tsv output of sjcount (STDIN) by the 5th column (offset) and outputs BED6+3 (STDOUT) with three extra columns being ";
     print STDERR "(7) total count, (8) staggered read count, (9) entropy\n";
 }
 
 parse_command_line(margin	=>{default=>0, 	description=>'the margin for offset'}, 
 		   readLength	=>{default=>0, 	description=>'the read length'}, 
 		   minintron	=>{default=>0,	description=>'min intron length'},
-		   maxintron    =>{default=>0,  description=>'max intron length'},
-		   tsv		=>{		description=>'the input file', ifunreadable=>'input not specified'}
+		   maxintron    =>{default=>0,  description=>'max intron length'}
 		  );
 
-open FILE, "<$tsv" || die;
-
-while($line=<FILE>) {
+while($line=<STDIN>) {
     chomp $line;
     ($chr, $beg, $end, $str, $offset, $count) = split /\t/, $line;
     $chr ="chr$chr" unless($chr=~/^chr/);
@@ -23,7 +20,6 @@ while($line=<FILE>) {
     next if($minintron  && ($end - $beg < $minintron + 2) || $maxintron && ($end - $beg > $maxintron + 2));
     push @{$data{$chr}{$beg}{$end}{$str}}, $count;
 }
-close FILE;
 
 foreach $chr(sort keys(%data)) {
     foreach $beg(sort {$a<=>$b} keys(%{$data{$chr}})) {

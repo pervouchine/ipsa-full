@@ -2,15 +2,13 @@
 use Perl::utils;
 
 if(@ARGV==0) {
-    print STDERR "This utility takes a BED6+3+2 file, where (10) is the annotation status and (11) is splice sites, and selects for each pair of beg/end the strand based on these two columns\n";
+    print STDERR "This utility takes a BED6+3+2 file (STDIN) where column #10 is the annotation status and #11 is splice sites, and selects for each pair of beg/end the strand based on these two columns (STDOUT)\n";
 }
 
 parse_command_line(annot => {default=>10, description=>'annotation column'},
-		   sites => {default=>11, description=>'splice site column'},
-		   bed   => {description=>'input file', ifunreadable=>'input not readable'});
+		   sites => {default=>11, description=>'splice site column'});
 
-open FILE, "<$bed" || die;
-while($line=<FILE>) {
+while($line=<STDIN>) {
     chomp $line;
     @array = split /\t/, $line;
     push @{$data{$array[0]}{$array[1]}{$array[2]}}, [@array];
