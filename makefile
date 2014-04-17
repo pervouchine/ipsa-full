@@ -47,7 +47,7 @@ ${DIR}hg19.idx ${DIR}hg19.dbx : ${DIR}chr1.fa
 	${MAPTOOLSDIR}bin/transf -dir ${DIR}chr1.fa -idx ${DIR}hg19.idx -dbx ${DIR}hg19.dbx
 
 ${DIR}hg19v18.gff : ${DIR}gencode.v18.annotation.gtf
-	perl Perl/transcript_elements.pl -gtf ${DIR}gencode.v18.annotation.gtf > ${DIR}hg19v18.gff
+	perl Perl/transcript_elements.pl < ${DIR}gencode.v18.annotation.gtf > ${DIR}hg19v18.gff
 
 example.dat : 
 	wget http://genome.crg.eu/~dmitri/export/ipsa/example_ipsa.dat -O example.dat
