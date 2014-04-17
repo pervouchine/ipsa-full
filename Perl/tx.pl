@@ -15,7 +15,7 @@ print STDERR "[<$annot";
 open FILE, $annot || die();
 while($line=<FILE>) {
     chomp $line;
-    ($chr, $trash, $element, $beg, $end, $trash, $str, $attr) = split /\t/, $line;
+    ($chr, $trash, $element, $beg, $end, $trash, $str, $frame, $attr) = split /\t/, $line;
     next unless($element eq "exon");
     $chr = "chr$chr" unless($chr=~/^chr/);
     $eid = join("_", $chr, $beg, $end, $str);

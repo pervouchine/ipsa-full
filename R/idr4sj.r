@@ -36,8 +36,7 @@ idr_default = 0
 data = list()
 for(i in 1:(length(cmd_args)-1)) {
     print(paste('Replicate', cmd_args[i]))
-    data[[i]] = read.delim(cmd_args[i], header=F) # read bed, replicate 1
-    data[[i]]$V4=='.'
+    data[[i]] = read.delim(cmd_args[i], header=F) # read replicate 1
 }
 
 if(length(cmd_args)==2) {
@@ -46,21 +45,15 @@ if(length(cmd_args)==2) {
 }
 
 if(length(cmd_args)>2) {
-    merge(data[[1]], data[[2]], by=intersect(c(1,2,3,4,6,10,11),1:ncol(data[[1]])), all=T) -> A    # merge and replace NAs by 0
-    A[is.na(A)] <- 0
-    npIDR(A[,c('V7.x','V7.y')]) -> A$idr
-    A$V4 = '.'
-    A$V5 = round(100*log2(A$V7.x + A$V7.y), digits=0)
-    A$V5[A$V5>1000] <- 1000
+    merge(data[[1]], data[[2]], by=intersect(c(1,2,3,4,8,9),1:ncol(data[[1]])), all=T) -> A    # merge and replace NAs by 0
+    B = A[,7:ncol(A)]
+    B[is.na(B)]<-0
+    A[,7:ncol(A)] = B
+    npIDR(A[,c('V5.x','V5.y')]) -> A$idr
+    A$V5 = A$V5.x + A$V5.y
+    A$V6 = A$V6.x + A$V6.y
     A$V7 = A$V7.x + A$V7.y
-    A$V8 = A$V8.x + A$V8.y
-    A$V9 = A$V9.x + A$V9.y
 }
 
 print(paste('Saving to', cmd_args[length(cmd_args)]))
 write.table(A[,c(colnames(data[[1]]), 'idr')], file=cmd_args[length(cmd_args)], col.names=F, row.names=F, quote=F, sep="\t")
-
-#    pdf(p$qc)
-#    library(ggplot2)
-#    ggplot(A[sample(nrow(A),N),], aes(x=V7.x, y=V7.y, colour=idr)) + geom_point() + scale_x_log10() + scale_y_log10() + ggtitle(cmd_args[8]) + xlab("R1") + ylab("R2")
-#    dev.off()

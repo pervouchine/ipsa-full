@@ -27,8 +27,10 @@ foreach $tid(keys(%exons)) {
     }
     if(keys(%chr)==1 && keys(%str)==1) {
 	for($i=0; $i<@array; $i++) {
-	    push @{$res{join("\t", keys(%chr), $source, 'exon',   $array[$i]->[1],   $array[$i]->[2], '.', keys(%str))}}, $tid;
-	    push @{$res{join("\t", keys(%chr), $source, 'intron', $array[$i-1]->[2], $array[$i]->[1], '.', keys(%str))}}, $tid if($i>0);
+	    push @{$res{join("\t", keys(%chr), $source, 'exon',   $array[$i]->[1],   $array[$i]->[2], '.', keys(%str), '.')}}, $tid;
+	    push @{$res{join("\t", keys(%chr), $source, 'intron', $array[$i-1]->[2], $array[$i]->[1], '.', keys(%str), '.')}}, $tid if($i>0);
+	    push @{$pos{join("\t", keys(%chr), $source, 'exon',   $array[$i]->[1],   $array[$i]->[2], '.', keys(%str), '.')}}, percent($i, @array-1);
+	    push @{$pos{join("\t", keys(%chr), $source, 'intron', $array[$i-1]->[2], $array[$i]->[1], '.', keys(%str), '.')}}, percent($i-1, @array-2)  if($i>0);
 	}
     }
     else {
@@ -37,7 +39,14 @@ foreach $tid(keys(%exons)) {
 }
 
 foreach $key(keys(%res)) {
-    print $key, "\t", set_attributes(belongsto=>join(",", @{$res{$key}})), "\n";
+    print $key, "\t", set_attributes(belongsto=>join(",", @{$res{$key}}), pos=>avg(@{$pos{$key}})), "\n";
 }
 
 print STDERR "[WARNING: $trans_spliced trans spliced transcripts excluded]" if($trans_spliced);
+
+sub percent {
+    return('NA') unless(@_[0]>=0 && @_[1]>0);
+    return(strand_c2i(keys(%str))<0 ? 1 - @_[0]/@_[1] : @_[0]/@_[1]);
+}
+
+

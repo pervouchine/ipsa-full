@@ -1,15 +1,17 @@
 #!/usr/bin/perl
-use Perl::utils;
+use lib qw(/users/rg/dmitri/software/utils/);
+use utils;
 use Switch;
 
 if(@ARGV==0) {
     print STDERR "This is a line-based utility for extracting splice junctions from SAM files\n";
+    print STDERR "Input is a SAM file (better to contrain to lines with 2 or more Ns)\n";
+    print STDERR "Output is tsv: chr/strand/number_of_splits/[beg/end/offset]/[beg/end/offset]/.../count\n";
 }
-
 
 parse_command_line( read1 => {description=>'flip read1 yes/no (1/0)', default=>1},
 		    read2 => {description=>'flip read2 yes/no (1/0)', default=>0},
-		    nbins => {description=>'number of bins', default=>1},
+		    maxnh => {description=>'max NH tag value',default=>0},
 		    lim   => {description=>'stop after this number of lines (for debug)',default=>0});
  
 $BAM_FREAD1 = 0x40;
@@ -24,12 +26,15 @@ for($s=0; $s<2; $s++) {
 
 
 while(<STDIN>){
-    ($id, $flag, $ref, $pos, $qual, $cigar) = split /\t/;
+    ($id, $flag, $ref, $pos, $qual, $cigar, $RNEXT, $PNEXT, $TLEN, $SEQ, $QUAL, $rest) = split /\t/, $_, 12;
     $s = (($flag & $BAM_FREVERSE)>0);
     $strand = ($flag & $BAM_FREAD1) ? ($s + $read[0]) & 1 : ($s + $read[1]) & 1;
+    $NH = ($rest =~ /NH\:i\:(\d+)/ ? $1 : 0);
 
     $n++;
     last if($n>$lim && $lim>0);
+
+    next if($NH>$maxnh && $maxnh>0);
 
     @array = ();
     $offset = 0;
@@ -44,18 +49,18 @@ while(<STDIN>){
 		     }
 	    case 'D' {  $pos += $increment;  
 		     }
-	    case 'N' {  $bin = int($offset/$nbins);
-			$bin = $nbins - 1 if($bin>=$nbins);
-			$count{join("\t", $ref, $pos - 1, $pos + $increment, $STRAND[$strand], $bin)}++; 
+	    case 'N' {  push @array, join(":", $pos - 1, $pos + $increment, $offset); 
 			$pos += $increment; 
 		     }
 	    case 'S' { $offset+=$increment;
 		     }
 	}
     }
+    if(@array>0) {
+	$count{join("\t", $ref, $STRAND[$strand], 0+@array, join(",",@array))}++;
+    }
 }
 
 foreach $key(keys(%count)) {
     print "$key\t$count{$key}\n";
 }
-

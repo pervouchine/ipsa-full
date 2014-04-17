@@ -2,11 +2,11 @@
 use Perl::utils;
 
 if(@ARGV==0) {
-    print STDERR "This utility takes a BED6+3+2 file (STDIN) where column #10 is the annotation status and #11 is splice sites, and selects for each pair of beg/end the strand based on these two columns (STDOUT)\n";
+    print STDERR "This utility takes a TSV4+3+2 file (STDIN) where column #8 is the annotation status and #9 is splice sites, and selects for each pair of beg/end the strand based on these two columns (STDOUT)\n";
 }
 
-parse_command_line(annot => {default=>10, description=>'annotation column'},
-		   sites => {default=>11, description=>'splice site column'});
+parse_command_line(annot => {default=>8, description=>'annotation column'},
+		   sites => {default=>9, description=>'splice site column'});
 
 while($line=<STDIN>) {
     chomp $line;

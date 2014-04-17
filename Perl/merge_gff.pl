@@ -8,7 +8,7 @@ if(@ARGV==0) {
 
 parse_command_line(i => {description=>'input gtf file name and label', array=>hash},
 		   o => {description=>'feature and output tsv file name', array=>hash},
-		   percent=>{description=>'do not report rows that have more than <value> NAs', defaut=>0.25},
+		   percent=>{description=>'do not report rows that have more than <value> NAs', defaut=>0},
 		   transf=>{description=>'transformation (log, logit)'});
 
 ################################################################################################################################
@@ -52,7 +52,7 @@ foreach $key(sort keys(%output)) {
             push @arr, $value =~/\d/ ? $value : "NA";
             $num++ if($value =~/\d/);
         }
-        print FILE join("\t", @arr), "\n" if($num>=$percent*@c);
+        print FILE join("\t", @arr), "\n" if($num>$percent*@c);
     }
     close FILE;
     print STDERR "]\n";

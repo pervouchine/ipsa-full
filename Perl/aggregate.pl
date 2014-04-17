@@ -26,9 +26,7 @@ foreach $chr(sort keys(%data)) {
 	foreach $end(sort {$a<=>$b} keys(%{$data{$chr}{$beg}})) {
 	    foreach $str(keys(%{$data{$chr}{$beg}{$end}})) {
 		@stats = sum(@{$data{$chr}{$beg}{$end}{$str}});
-		$score = sprintf("%.0f", 100*log($stats[0])/log(2));
-		$score = 1000 if($score > 1000);
-	    	print join("\t", $chr, $beg, $end, '.', $score, $str, @stats), "\n";
+	    	print join("\t", $chr, $beg, $end, $str, @stats), "\n";
 	    }
 	}
     }
