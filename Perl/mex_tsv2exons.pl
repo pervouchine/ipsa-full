@@ -1,6 +1,5 @@
 #!/usr/bin/perl
-use lib qw(/users/rg/dmitri/software/utils/);
-use utils;
+use Perl::utils;
 
 if(@ARGV==0) {
     print STDERR "input: STDIN, output: STDOUT\n";

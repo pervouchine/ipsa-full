@@ -1,6 +1,5 @@
 #!/usr/bin/perl
-use lib qw(/users/rg/dmitri/software/utils/);
-use utils;
+use Perl::utils;
 
 if(@ARGV==0) {
     print STDERR "This utility takes an aggregated BED6+3 file, the genomic annotation, and the genome, and outputs BED6+3+2 with two more columns: ";

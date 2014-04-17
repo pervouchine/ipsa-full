@@ -1,6 +1,5 @@
 #!/usr/bin/perl
-use lib qw(/users/rg/dmitri/software/utils/);
-use utils;
+use Perl::utils;
 use Switch;
 
 if(@ARGV==0) {

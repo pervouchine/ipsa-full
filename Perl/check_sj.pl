@@ -1,5 +1,5 @@
-use lib qw(/users/rg/dmitri/software/utils/);
-use utils;
+#!/usr/bin/perl
+use Perl::utils;
 
 if(@ARGV==0) {
     print STDERR "This script checks multiple SJ paths against already annotated SJs\n";
