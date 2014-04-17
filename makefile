@@ -7,13 +7,13 @@ SJCOUNTDIR=sjcount-2.0/
 all :: ${SJCOUNTDIR}sjcount ${MAPTOOLSDIR}bin/transf ${MAPTOOLSDIR}bin/getsegm
 
 ${SJCOUNTDIR}sjcount : 
-	wget https://github.com/pervouchine/sjcount/archive/v2.0.tar.gz
+	wget https://github.com/pervouchine/sjcount/archive/v2.0.tar.gz -O v2.0.tar.gz
 	tar -xf v2.0.tar.gz 
 	rm -f v2.0.tar.gz
 	make -C ${SJCOUNTDIR} all
 
 ${MAPTOOLSDIR}bin/transf ${MAPTOOLSDIR}bin/getsegm:
-	wget https://github.com/pervouchine/maptools/archive/v2.0.tar.gz
+	wget https://github.com/pervouchine/maptools/archive/v2.0.tar.gz -O v2.0.tar.gz
 	tar -xf v2.0.tar.gz 
 	rm -f v2.0.tar.gz
 	mkdir -p ${MAPTOOLSDIR}bin/
