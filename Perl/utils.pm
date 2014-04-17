@@ -18,9 +18,10 @@ sub parse_command_line {
     my %hash = @_;
     foreach $key(sort keys(%hash)) {
 	my %param = %{$hash{$key}};
+	($trash, $param{'default'}) = split /[=\n]/, `grep ^$key= makefile` if($param{'variable'});
 	$$key = $param{'default'} if($param{'default'} ne undef);
 	my $obligatory = $param{'ifunreadable'} || $param{'ifabsent'};
-	if(@ARGV==0) {
+	if(@ARGV==0 && !$param{'variable'}) {
 	    print STDERR "\t-$key", ($param{'store'} ? undef : " ..."), ", ", $param{'description'};
 	    print STDERR ", default=$param{'default'}" if($param{'default'} ne undef);
 	    print STDERR ", obligatory" if($obligatory);
@@ -105,7 +106,6 @@ sub make {
     $param{'script'} = "perl Perl/$param{'script'}" if($param{'script'}=~/\.pl$/);
     $param{'script'} = "Rscript R/$param{'script'}" if($param{'script'}=~/\.r$/);
     print join(" ", values(%{$param{'output'}}))," : ",join(" ", values(%{$param{'input'}}), @{$param{'depend'}}), "\n";
-    print "\ttouch ", join(" ", values(%{$param{'output'}})),"\n" if($param{'touch'});
     if($param{'mkdir'}) {
 	my %dirs=();
 	foreach my $filename(values(%{$param{'output'}})) {
@@ -115,9 +115,41 @@ sub make {
 	}
 	print "\tmkdir -p ", join(" ", keys(%dirs)), "\n" if(keys(%dirs)>0);
     }
+    print "\ttouch ", join(" ", values(%{$param{'output'}})),"\n" if($param{'touch'});
     print "\t$param{'script'} ",join(" ", $param{'before'}, %{$param{'input'}}, $param{'between'}, %{$param{'output'}}, $param{'after'})," \n";
     print "$param{'endpoint'} :: ", join(" ", values(%{$param{'output'}})), "\n" if($param{'endpoint'});
     print "rm-$param{'endpoint'} ::\n\t rm -f ", join(" ", values(%{$param{'output'}})), "\n" if($param{'endpoint'});
+}
+
+sub make2 {
+    my %param =@_;
+    my %inputs = %{$param{'inputs'}};
+    $param{'script'} = "perl Perl/$param{'script'}" if($param{'script'}=~/\.pl$/);
+    foreach $key(keys(%{$param{'outputs'}})) { 
+	print join(" ", values(%{$param{'outputs'}{$key}})),' '; 
+    }
+    print ":";
+    foreach $key(keys(%{$param{'inputs'}})) { 
+	print join(" ", keys(%{$param{'inputs'}{$key}})),' '; 
+    }
+    print "\n\t$param{'script'} $param{'before'}";
+    foreach $key(keys(%{$param{'inputs'}})) {
+	foreach $input(keys(%{$param{'inputs'}{$key}})) {
+	    print "$key $input $param{'inputs'}{$key}{$input} ";
+	}
+    }
+    print $param{'between'}, ' ';
+    foreach $key(keys(%{$param{'outputs'}})) {
+	foreach $output(keys(%{$param{'outputs'}{$key}})) {
+	    print "$key $output $param{'outputs'}{$key}{$output} ";
+	}
+    }
+    print $param{'after'},"\n";
+    return unless($param{'endpoint'});
+    print "$param{'endpoint'} :: ";
+    foreach $key(keys(%{$param{'outputs'}})) {
+	print join(" ", values(%{$param{'outputs'}{$key}})), "\n";
+    }
 }
 
 ################################################################################################################################################
@@ -161,9 +193,15 @@ sub progressbar {
     print STDERR "\n" if($current==$last);
 }
 
+################################################################################################################################################
 sub sum {
     my $s=0;
     foreach my $x(@_) {$s+=$x;}
     return($s);
+}
+
+sub avg {
+    return("NA") unless(@_>0);
+    return(sprintf("%.2lf", sum(@_)/@_));
 }
 

@@ -126,6 +126,12 @@ chr2L SJPIPE  exon    500   600   .    +    belongsto "1,2";
 Note that transcripts and introns are not shown in the input gtf. The information contained in the 'belongsto' field will be used only in 
 TXPIPE pipeline to compute splicing indices from transcript quantification (see section~\ref{sec::txpipe}).
 
+{\bf NB} In what follows, the processed annotation has to be sorted. Therefore it is necessary to pipe it with the sort step as follows.
+
+\begin{verbatim} 
+perl Perl/transcript_elements.pl - < input.gtf | sort -k1,1 -k4,5n > output.gff
+\end{verbatim}
+
 %%%%%%%%%%%%%
 
 \subsubsection{Genome pre-processing}
@@ -228,12 +234,12 @@ where $536=100*\log_2(41)$ and $1.28$ is the entropy of the distribution.
 
 \subsubsection[Annotation status and splice site nucleotides]{Checking the annotation status of a SJ and retrieving splice site nucleotides}
 \label{sec::annotation_status}
-The \prog{annotate.pl} takes an aggregated BED6+3 file (i.e., the output of \prog{aggregate.pl}) on STDIN, the genomic annotation, and the genome, and outputs BED6+5 
+The \prog{annotate.pl} takes an aggregated BED6+3 file (the output of \prog{aggregate.pl}), the genomic annotation, and the genome, and outputs BED6+5 
 with two more columns: (10) the annotation status and (11) splice sites. The output is sent to \prog{stdout}.
 \begin{verbatim}
 annotate.pl
-Input:  BED6+3 file (the output of aggregate.pl) on STDIN
-        -annot ..., the annotation (gff), obligatory
+Input:  -bed BED6+3 file (the output of aggregate.pl) 
+        -annot ..., the annotation (gtf), obligatory
         -dbx ..., the genome (dbx), obligatory
         -idx ..., the genome (idx), obligatory
 Outout: BED6+5 on STDOUT
@@ -243,10 +249,10 @@ The genome consists of two compressed files, *.dbx and *.idx, which can be obtai
 
 The annotation status is defined numerically as follows:
 \begin{enumerate}
-\item[0] None of the splice sites of the given SJ is annotated;
-\item[1] One of the splice sites of the given SJ is annotated, and the other is not;
-\item[2] Both splice sites of the given SJ are annotated but the intron between them is not;
-\item[3] Both splice sites of the given SJ are annotated, and so is the intron between them.
+\item[(0)] None of the splice sites of the given SJ is annotated;
+\item[(1)] One of the splice sites of the given SJ is annotated, and the other is not;
+\item[(2)] Both splice sites of the given SJ are annotated but the intron between them is not;
+\item[(3)] Both splice sites of the given SJ are annotated, and so is the intron between them.
 \end{enumerate}
 
 The splice site nucleotides are the four intronic nucleotides, two flanking ones from each end, such as GTAG or ATAC. Since for this field and for the annotation status strand 
@@ -276,8 +282,8 @@ choose_strand.pl
 Input:  BED6+5 file on STDIN
 Output: BED6+5 file on STDOUT
 Options:
-	-annot ..., annotation column, default=10
-	-sites ..., splice site column, default=11
+        -annot ..., annotation column, default=10
+        -sites ..., splice site column, default=11
 \end{verbatim}
 For each combination of chromosome, begin, and end, the strand with greater annotation status (see section~\ref{sec::annotation_status}) is chosen. In case of 
 a tie (usually $0$ on both strands), the strand is chosen based on the ``largest'' splice site nucleotides in terms of lexicographic order (TTTT$>$GTAG$>\dots$).
@@ -308,7 +314,7 @@ This is done by \prog{constrain\_ssc.pl} utility.
 \begin{verbatim}
 constrain_ssc.pl
 Input:  BED6+3 ssc (reads overlapping splice sites) on STDIN
-	-ssj ..., input ssj (bed) file, obligatory
+        -ssj ..., input ssj (bed) file, obligatory
 Output: BED6+3 on STDOUT
 \end{verbatim}
 Here -ssj is the BED file after strand choice was made, -ssc is the output of \prog{sjcount}. The output of \prog{constrain\_ssc.pl}is sent to \prog{stdout}. 
@@ -350,11 +356,11 @@ intact after filtering, but also the annotated SJ are also assessed and reported
 \begin{verbatim}
 zeta.pl -ssj <file> -ssc <file> -annot <gtf>
 Inputs:	-ssj and -ssc = SJ and SS counts in column 7;
-	-annot, the annotation (gtf) with exons and introns
+        -annot, the annotation (gtf) with exons and introns
 Options:
-	-mincount = min denominator (will produce NA 
+        -mincount = min denominator (will produce NA 
          if denominator is smaller than this value)
-	-stranded = 1(yes) or 0(no), default=1
+        -stranded = 1(yes) or 0(no), default=1
 \end{verbatim}
 Here, whenever a ratio is calculated, we usually relate inclusion quantity to the sum of inclusion and exclusion quantities. The latter, however, can be a 
 small integer number and, therefore, a threshold is needed to cut off estimates with large standard errors. This threshold is -mincount. There is also an option 
@@ -388,8 +394,8 @@ exon). Note that this definition doesn't require gene id at all.
 
 \begin{verbatim}
 tx.pl -annot <file> -quant <file>
-	-annot, the genomic annotation (gtf)
-	-quant, the transcript quantification file (gtf/gff)
+        -annot, the genomic annotation (gtf)
+        -quant, the transcript quantification file (gtf/gff)
 \end{verbatim}
 
 The transcript abundance is defined in the gtf field 9 as 'RPKM' attribute or as the mean of the two bioreplicates defined by

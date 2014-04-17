@@ -1,22 +1,21 @@
 DIR=data/
-EXPORT=ipsa-v0.1
-MAPTOOLSDIR=maptools-1.0/
-SJCOUNTDIR=sjcount-1.0/
+MAPTOOLSDIR=maptools-2.0/
+SJCOUNTDIR=sjcount-2.0/
 
 ###############################################################################################
 
 all :: ${SJCOUNTDIR}sjcount ${MAPTOOLSDIR}bin/transf ${MAPTOOLSDIR}bin/getsegm
 
 ${SJCOUNTDIR}sjcount : 
-	wget https://github.com/pervouchine/sjcount/archive/v1.0.tar.gz
-	tar -xf v1.0
-	rm -f v1.0
+	wget https://github.com/pervouchine/sjcount/archive/v2.0.tar.gz
+	tar -xf v2.0.tar.gz 
+	rm -f v2.0.tar.gz
 	make -C ${SJCOUNTDIR} all
 
 ${MAPTOOLSDIR}bin/transf ${MAPTOOLSDIR}bin/getsegm:
-	wget https://github.com/pervouchine/maptools/archive/v1.0.tar.gz
-	tar -xf v1.0
-	rm -f v1.0
+	wget https://github.com/pervouchine/maptools/archive/v2.0.tar.gz
+	tar -xf v2.0.tar.gz 
+	rm -f v2.0.tar.gz
 	mkdir -p ${MAPTOOLSDIR}bin/
 	make -C ${MAPTOOLSDIR} all
 
@@ -57,19 +56,4 @@ example.dat :
 
 example.mk : ${DIR}hg19.idx ${DIR}hg19.dbx ${DIR}hg19v18.gff example.dat makefile
 	perl Perl/make.pl -repository input/ -dir output/ -group idrGroup -param '-read1 0' -annot ${DIR}hg19v18.gff -genome ${DIR}hg19 -merge pooled < example.dat > example.mk
-
-###############################################################################################
-
-${EXPORT}.tar.gz export : 
-	mkdir -p ${EXPORT}/
-	cp -r Perl/ ${EXPORT}/
-	cp -r R/  ${EXPORT}/
-	cp -r latex/ ${EXPORT}/
-	cp -f LICENSE ${EXPORT}/
-	cp -f VERSION ${EXPORT}/
-	cp -f makefile ${EXPORT}/
-	cp -f README.md ${EXPORT}/
-	tar -cf ${EXPORT}.tar ${EXPORT}/
-	gzip ${EXPORT}.tar
-	rm -f -r ${EXPORT}/
 
