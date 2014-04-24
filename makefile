@@ -2,6 +2,7 @@ DIR=data/
 MAPTOOLSDIR=maptools-2.0/
 SJCOUNTDIR=sjcount-2.0/
 
+
 ###############################################################################################
 
 all :: ${SJCOUNTDIR}sjcount ${MAPTOOLSDIR}bin/transf ${MAPTOOLSDIR}bin/getsegm
