@@ -2,8 +2,8 @@
 use Perl::utils;
 
 if(@ARGV==0) {
-    print STDERR "This utility aggregates tsv output of sjcount (STDIN) by the 5th column (offset) and outputs BED6+3 (STDOUT) with three extra columns being ";
-    print STDERR "(7) total count, (8) staggered read count, (9) entropy\n";
+    print STDERR "This utility aggregates the output of sjcount (STDIN) by the 5th column (offset) and outputs a TSV (STDOUT) with three extra columns being ";
+    print STDERR "(5) total count, (6) staggered read count, (7) entropy\n";
 }
 
 parse_command_line(margin	=>{default=>0, 	description=>'the margin for offset'}, 

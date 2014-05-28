@@ -10,7 +10,7 @@ opt <- parse_args(OptionParser(option_list=option_list))
 
 data  = read.delim(opt$tsv)
 
-p_in <- pipe(paste("print_gff_attributes.pl INT  pos <", opt$gff), 'r')
+p_in <- pipe(paste("Perl/print_gff_attributes.pl INT  pos <", opt$gff), 'r')
 exons = read.delim(p_in, header=F)
 
 entropy <- function(x) {y=sum(x);x[x==0]<- 1;log2(y)-sum(x*log2(x))/y}
@@ -18,7 +18,7 @@ entropy <- function(x) {y=sum(x);x[x==0]<- 1;log2(y)-sum(x*log2(x))/y}
 func1 <- function(data, main) {
   unlist(lapply(strsplit(rownames(data), "_"), function(x){as.numeric(x[3]) - as.numeric(x[2]) + 1})) -> l
 
-  hist(l[l<=100], xlab="main length (nt)", main=main, breaks=seq(-0.5,100.5,1))
+  hist(l[l<=100], xlab="exon length (nt)", main=main, breaks=seq(-0.5,100.5,1))
 
   apply(data, 1, function(x){length(x[x!=0])}) -> x
   hist(x, xlab="number of samples", main=main)

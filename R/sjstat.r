@@ -2,7 +2,6 @@ suppressPackageStartupMessages(library("optparse"))
 suppressPackageStartupMessages(library("plyr"))
 option_list <- list(make_option(c("-i", "--inp"), help="tsv input"))
 
-
 opt <- parse_args(OptionParser(option_list=option_list))
 
 print(opt$inp)

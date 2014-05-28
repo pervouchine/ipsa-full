@@ -200,8 +200,25 @@ sub sum {
     return($s);
 }
 
+sub sumt {
+    my $s=0;
+    foreach my $x(@{@_[0]}) {
+	$s++ if($x>@_[1]);
+    }
+    return($s);
+}
+
+
 sub avg {
     return("NA") unless(@_>0);
     return(sprintf("%.2lf", sum(@_)/@_));
+}
+
+sub csuniq {
+    my %f = ();
+    foreach $z(@_) {
+        $f{$z}=1 if($z);
+    }
+    return(join(",",sort keys(%f)));
 }
 

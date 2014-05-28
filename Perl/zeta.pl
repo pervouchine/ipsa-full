@@ -152,7 +152,8 @@ foreach $chr(sort keys(%count53)) {
                 $cosi5 = frac($nDA + $nDX, $nD);
                 $cosi3 = frac($nDA + $nXA, $nA);
 		next unless(join(undef, $psi5,$psi3,$cosi5,$cosi3) =~ /\d/);
-                print join("\t", $chr, 'SJPIPE', 'intron', $beg, $end, $psi5=~/\d/ ? int(500*($psi5 + $psi3)) : '.', strand_i2c($str), '.',
+		($x, $y) = sort {$a<=>$b} ($beg, $end);
+                print join("\t", $chr, 'SJPIPE', 'intron', $x, $y, $psi5=~/\d/ ? int(500*($psi5 + $psi3)) : '.', strand_i2c($str), '.',
                         set_attributes(psi5=>$psi5, psi3=>$psi3, cosi5=>$cosi5, cosi3=>$cosi3, nDA=>$nDA, nDX=>$nDX, nXA=>$nXA, nD=>$nD, nA=>$nA)), "\n";
             }
         }

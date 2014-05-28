@@ -40,7 +40,7 @@ foreach $chr(keys(%exon)) {
 print STDERR "]\n";
 
 print STDERR "[<$quant";
-open FILE, $quant || die();
+open FILE, "sort -k1,1 -k4,4n $quant |" || die();
 while($line=<FILE>) {
     chomp $line;
     ($chr, $source, $element, $beg, $end, $name, $str, $trash, $attr) = split /\t/, $line;

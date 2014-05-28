@@ -8,7 +8,7 @@ if(@ARGV==0) {
 
 parse_command_line(i => {description=>'input gtf file name and label', array=>hash},
 		   o => {description=>'feature and output tsv file name', array=>hash},
-		   percent=>{description=>'do not report rows that have more than <value> NAs', defaut=>0},
+		   percent=>{description=>'do not report rows that have more than <value> NAs', defaut=>0.25},
 		   transf=>{description=>'transformation (log, logit)'});
 
 ################################################################################################################################

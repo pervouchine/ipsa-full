@@ -2,9 +2,9 @@
 use Perl::utils;
 
 if(@ARGV==0) {
-    print STDERR "This utility takes an aggregated BED6+3 file, the genomic annotation, and the genome, and outputs BED6+3+2 with two more columns: ";
-    print STDERR "(10) annotation status and (11) splice sites\n";
-    print STDERR "If BED6+3 was strandless ('.' in column 6) then each line will be reported twice, one for '+' and and for '-' strand\n";
+    print STDERR "This utility takes an aggregated TSV file, the genomic annotation, and the genome, and outputs a TSV with two more columns: ";
+    print STDERR "(8) annotation status and (9) splice sites\n";
+    print STDERR "If the input was strandless ('.' in column 4) then each line will be reported twice, one for '+' and and for '-' strand\n";
 }
 
 parse_command_line(	in	=> {description=>'the input tsv file', ifunreadable=>'input not specified'},
