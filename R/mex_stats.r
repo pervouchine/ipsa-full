@@ -10,7 +10,7 @@ opt <- parse_args(OptionParser(option_list=option_list))
 
 data  = read.delim(opt$tsv)
 
-p_in <- pipe(paste("Perl/print_gff_attributes.pl INT  pos <", opt$gff), 'r')
+p_in <- pipe(paste("perl Perl/print_gff_attributes.pl INT  pos <", opt$gff), 'r')
 exons = read.delim(p_in, header=F)
 
 entropy <- function(x) {y=sum(x);x[x==0]<- 1;log2(y)-sum(x*log2(x))/y}

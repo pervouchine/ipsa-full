@@ -54,12 +54,11 @@ while($line=<STDIN>) {
         $target  =~ s/\.bam$//;
         $name = "$dir$target";
 
-	make(script=>$SJCOUNTDIR."sjcount", input=>{-bam=>$file}, output=>{-ssj=>"$name.A01.ssj.tsv", -ssc=>"$name.A01.ssc.tsv"}, 
-	     after=>"-log $name.A01.ssj.log -binsize 1 -nbins $readLength $param $stranded -quiet", mkdir=>T,touch=>T);
-	print "A01 :: $name.A01.ssj.tsv\n";
+	make(script=>$SJCOUNTDIR."sjcount3", input=>{-bam=>$file}, output=>{-ssj=>"$name.A01.ssj.tsv", -ssc=>"$name.A01.ssc.tsv"}, 
+	     after=>"-log $name.A01.ssj.log -binsize 1 -nbins $readLength $param $stranded -quiet", mkdir=>T, endpoint=>A01);
 
-	make(script=>"aggregate.pl", input=>{'<'=>"$name.A01.ssj.tsv"}, output=>{'>'=>"$name.A02.ssj.tsv"}, before=>"-readLength $readLength -margin $margin -minintron 4", endpoint=>'A02');
-        make(script=>"aggregate.pl", input=>{'<'=>"$name.A01.ssc.tsv"}, output=>{'>'=>"$name.A02.ssc.tsv"}, before=>"-readLength $readLength -margin $margin -minintron 0", endpoint=>'A02');
+	make(script=>"aggregate1.pl", input=>{'<'=>"$name.A01.ssj.tsv"}, output=>{'>'=>"$name.A02.ssj.tsv"}, before=>"-readLength $readLength -margin $margin", endpoint=>'A02');
+        make(script=>"aggregate2.pl", input=>{'<'=>"$name.A01.ssc.tsv"}, output=>{'>'=>"$name.A02.ssc.tsv"}, before=>"-readLength $readLength -margin $margin", endpoint=>'A02');
 
 	make(script=>"annotate.pl",      input=>{-in=>"$name.A02.ssj.tsv", -annot=>$annot, -dbx=>"$genome.dbx", -idx=>"$genome.idx"}, output=>{'>'=>"$name.A03.ssj.tsv"}, endpoint=>'A03');
 	make(script=>"choose_strand.pl", input=>{'<'=>"$name.A03.ssj.tsv"}, output=>{'>'=>"$name.A04.ssj.tsv"}, before=>"-", endpoint=>'A04');
@@ -74,12 +73,11 @@ while($line=<STDIN>) {
 	make(script=>"disproportion.r", input=>{-i=>"$name.A02.ssj.tsv"}, output=>{-o=>"$name.A02.ssj.pdf"}, endpoint=>'QC2');
 	make(script=>"sjstat.r", input=>{-i=>"$name.A04.ssj.tsv"}, output=>{'>'=>"$name.A04.ssj.log"}, endpoint=>'QC3');
 
-        make(script=>"samtools view", input=>{''=>$file}, between=>"| awk '\$\$6~/N.*N/' | perl Perl/sam2sjall.pl $param - >", output=>{''=>"$name.D01.tsv"}, endpoint=>'D01', mkdir=>T);
-        make(script=>"check_sj.pl",   input=>{'<'=>"$name.D01.tsv", -ssj=>"$name.A04.ssj.tsv"}, output=>{'>'=>"$name.D02.tsv"}, endpoint=>'D02');
+        make(script=>"aggregate3.pl", input=>{'<'=>"$name.A01.ssj.tsv",-ssj=>"$name.A04.ssj.tsv"}, output=>{'>'=>"$name.D01.tsv"}, endpoint=>'D01', mkdir=>T);
 
         $sj_merge{$key}{"$dir$id.A07.gff"}      = $id;
 	$ce_merge{$key}{"$dir$id.B07.gff"}      = $id;
-        $me_merge{$key}{"$name.D02.tsv"}        = $id;
+        $me_merge{$key}{"$name.D01.tsv"}        = $id;
 
     }
 

@@ -4,7 +4,7 @@ exit unless(@ARGV>0);
 
 foreach $file(@ARGV) {
   open FILE, $file;
-  print "$file:\n";
+  print "$file :\n";
   %f = %g = ();
   while(<FILE>) {
     chomp;
@@ -21,9 +21,17 @@ foreach $file(@ARGV) {
   foreach $k(sort keys(%f)) {
     next if($k=~/^Q/);
     if(keys(%{$f{$k}})>1) {
-	print "$k\t",sprintf("%.1lf",100*keys(%{$g{$k}})/keys(%{$f{$k}})), "\n";
+	print "$k\t"; #,sprintf("%.1lf",100*keys(%{$g{$k}})/keys(%{$f{$k}})), "\n";
     }
   }
+  print "\n";
+  foreach $k(sort keys(%f)) {
+    next if($k=~/^Q/);
+    if(keys(%{$f{$k}})>1) {
+        print sprintf("%.1lf",100*keys(%{$g{$k}})/keys(%{$f{$k}})), "\t";
+    }
+  }
+  print "\n\n";
 }
 
 

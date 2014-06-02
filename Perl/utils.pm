@@ -117,7 +117,7 @@ sub make {
     }
     print "\ttouch ", join(" ", values(%{$param{'output'}})),"\n" if($param{'touch'});
     print "\t$param{'script'} ",join(" ", $param{'before'}, %{$param{'input'}}, $param{'between'}, %{$param{'output'}}, $param{'after'})," \n";
-    print "$param{'endpoint'} :: ", join(" ", values(%{$param{'output'}})), "\n" if($param{'endpoint'});
+    print "$param{'endpoint'} :: ", (values(%{$param{'output'}}))[0], "\n" if($param{'endpoint'});
     print "rm-$param{'endpoint'} ::\n\t rm -f ", join(" ", values(%{$param{'output'}})), "\n" if($param{'endpoint'});
 }
 
@@ -208,7 +208,6 @@ sub sumt {
     return($s);
 }
 
-
 sub avg {
     return("NA") unless(@_>0);
     return(sprintf("%.2lf", sum(@_)/@_));
@@ -220,5 +219,18 @@ sub csuniq {
         $f{$z}=1 if($z);
     }
     return(join(",",sort keys(%f)));
+}
+
+sub aggstat {
+    my $s = 0;
+    my $c = 0;
+    my $l = 0;
+    foreach $val(@_) {
+        $s+=$val;
+        $c+=1;
+        $l+=$val*log($val);
+    }
+    my $h = sprintf("%.2f", (log($s) - $l/$s)/log(2));
+    return($s, $c, $h>0 ? $h : 0);
 }
 

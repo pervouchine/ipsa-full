@@ -14,33 +14,20 @@ parse_command_line(margin	=>{default=>0, 	description=>'the margin for offset'},
 
 while($line=<STDIN>) {
     chomp $line;
-    ($chr, $beg, $end, $str, $offset, $count) = split /\t/, $line;
+    ($id, $deg, $offset, $count) = split /\t/, $line;
+    next unless($deg==0);
+    ($chr, $pos, $str) = split /\_/, $id;
     $chr ="chr$chr" unless($chr=~/^chr/);
     next if($readLength && $margin && ($offset < $margin || $offset >= $readLength - $margin));
-    next if($minintron  && ($end - $beg < $minintron + 2) || $maxintron && ($end - $beg > $maxintron + 2));
-    push @{$data{$chr}{$beg}{$end}{$str}}, $count;
+    push @{$data{$chr}{$pos}{$str}}, $count;
 }
 
 foreach $chr(sort keys(%data)) {
-    foreach $beg(sort {$a<=>$b} keys(%{$data{$chr}})) {
-	foreach $end(sort {$a<=>$b} keys(%{$data{$chr}{$beg}})) {
-	    foreach $str(keys(%{$data{$chr}{$beg}{$end}})) {
-		@stats = sum(@{$data{$chr}{$beg}{$end}{$str}});
-	    	print join("\t", $chr, $beg, $end, $str, @stats), "\n";
-	    }
+    foreach $pos(sort {$a<=>$b} keys(%{$data{$chr}})) {
+	foreach $str(keys(%{$data{$chr}{$pos}})) {
+	    @stats = aggstat(@{$data{$chr}{$pos}{$str}});
+	    print join("\t", $chr, $pos, $pos, $str, @stats), "\n";
 	}
     }
 }
 		
-sub sum {
-    my $s = 0;
-    my $c = 0;
-    my $l = 0;
-    foreach $val(@_) {
-	$s+=$val;
-	$c+=1;
-	$l+=$val*log($val);
-    }
-    my $h = sprintf("%.2f", (log($s) - $l/$s)/log(2));
-    return($s, $c, $h>0 ? $h : 0);
-}

@@ -18,22 +18,10 @@ foreach $file(keys(%input)) {
     open FILE, $file;
     while($line = <FILE>) {
 	chomp $line;
-	@a = split /\t/, $line;
-	$z = pop(@a);
-        ($chr, $str, $deg, $location) = split /\t/, $line;
+	($id, $count, $stag, $entr) = split /\t/, $line;
         $chr = "chr$chr" unless($chr=~/^chr/);
-        @segm = ();
-	@array = split /\,/, $location;
-        for($i=0;$i<@array;$i++) {
-            ($beg, $end, $offset) = split /\:/, $array[$i];
-            push @segm, ($beg, $end);
-        }
-	for($i=0; $i<@segm-2; $i+=2) {
-	    $id = join("_", $chr, $segm[$i], $segm[$i+1], $segm[$i+2], $segm[$i+3], $str);
-	    $data{$name}{$id} += $z;
-	    $rows{$id} = 1;
-	}
-	$cols{$name} = 1;
+	$data{$name}{$id} += $count;
+	$rows{$id} = $cols{$name} = 1;
     }
     print STDERR "]",++$n,"\n";
     close FILE;
