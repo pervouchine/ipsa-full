@@ -22,9 +22,13 @@ while($line=<STDIN>) {
     chomp $line;
     ($id, $deg, $offset, $count) = split /\t/, $line;
     next unless($deg==2);
-    ($chr, $x, $y, $z, $t, $str) = split /\_/, $id;
-    next unless($jnc{join("\t", $chr, $x, $y, $str)} && $jnc{join("\t", $chr, $z, $t, $str)});
-    push @{$data{$id}}, $count;
+    ($chr, $x, $y, $z, $t, $strand) = split /\_/, $id;
+    foreach $str("+", "-") {
+        if($strand eq $str || $strand eq '.') {
+    	    next unless($jnc{join("\t", $chr, $x, $y, $str)} && $jnc{join("\t", $chr, $z, $t, $str)});
+    	    push @{$data{join("_", $chr, $x, $y, $z, $t, $str)}}, $count;
+	}
+    }
 }
 
 foreach $id(sort keys(%data)) {

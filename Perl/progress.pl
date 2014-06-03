@@ -21,7 +21,7 @@ foreach $file(@ARGV) {
   foreach $k(sort keys(%f)) {
     next if($k=~/^Q/);
     if(keys(%{$f{$k}})>1) {
-	print "$k\t"; #,sprintf("%.1lf",100*keys(%{$g{$k}})/keys(%{$f{$k}})), "\n";
+	print substr($k,0,7),"\t"; #,sprintf("%.1lf",100*keys(%{$g{$k}})/keys(%{$f{$k}})), "\n";
     }
   }
   print "\n";
