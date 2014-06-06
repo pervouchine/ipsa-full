@@ -23,6 +23,7 @@ while($line=<STDIN>) {
     ($id, $deg, $offset, $count) = split /\t/, $line;
     next unless($deg==2);
     ($chr, $x, $y, $z, $t, $strand) = split /\_/, $id;
+    $chr ="chr$chr" unless($chr=~/^chr/);
     foreach $str("+", "-") {
         if($strand eq $str || $strand eq '.') {
     	    next unless($jnc{join("\t", $chr, $x, $y, $str)} && $jnc{join("\t", $chr, $z, $t, $str)});
