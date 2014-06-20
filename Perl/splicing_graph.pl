@@ -27,7 +27,7 @@ while($line=<FILE>) {
     $str = strand_c2i($str);
     ($beg, $end) = reverse ($beg, $end) if($str<0);
     %attr = get_attributes($attr);
-    foreach $transcript(split /\,/, $attr{'belongsto'}) {
+    foreach $transcript(split /\,/, $attr{'transcript_id'}) {
 	push @{$exons{$chr}{$str}{$transcript}}, [$beg, $end];
     }
     $n++;

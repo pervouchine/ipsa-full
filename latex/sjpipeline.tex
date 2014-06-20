@@ -1,4 +1,5 @@
 \documentclass{article}
+\usepackage{tikz}
 \usepackage{array}
 \usepackage{graphicx}
 \usepackage{lscape}
@@ -6,58 +7,54 @@
 \usepackage{multirow}
 \usepackage{hyperref}
 \usepackage{subfig}
-
-\usepackage[latin1]{inputenc}
-\usepackage{tikz}
-\usetikzlibrary{calc, shapes, arrows, positioning}
+\usepackage[affil-it]{authblk}
 
 \DeclareMathOperator{\SJ}{SJ}
 
-\renewcommand{\baselinestretch}{1.1}
+\renewcommand{\baselinestretch}{1.2}
+
+\usetikzlibrary{calc, shapes, arrows, positioning}
+
 \newcommand{\prog}[1]{{\tt\em #1}}
 
 \begin{document}
-\title{Splicing Analysis and Quantification Pipeline}
-\author{Dmitri D. Pervouchine}
+\title{IPSA: Integrative Pipeline for Splicing Analysis}
+\author{Dmitri D. Pervouchine\thanks{email: dp@crg.eu}}\affil{Centre for Genomic Regulation (CRG), Barcelona, Spain}
+
 \date{\today}
 \maketitle
-
-
 \tableofcontents
 
-\section{Overview}
-This document contains a full description of main processing steps of splicing analysis and quantification pipelines. 
-There are at least two such independent pipelines, abbreviated here as SJPIPE and TXPIPE. 
+\section{Synopsis}
+This document contains the description of the integrative splicing analysis pipeline. The integrative pipeline
+consists of several sub-pipelines, of which we primarily discuss SJPIPE and TXPIPE.
 
-SJPIPE implements the quantification of splicing events by directly analyzing the alignments in BAM files 
-(Figure~\ref{fig::sjpipe}). The advantage of SJPIPE is that it allows quantification of annotated as well as 
-novel splice junctions and that there is no annotation-related interference between independent splicing events. 
-An obvious disadvantage, however, is that only a part of the sequencing information is used, one which is related 
-to local short read distribution at splice junctions, while the reads that are contained in exons or introns are 
-completely ignored.
+SJPIPE implements the quantification of splicing events by directly analyzing split alignments 
+in BAM files (Figure~\ref{fig::sjpipe}). The advantage of SJPIPE is that it quantifies annotated 
+as well as novel splice junctions and that there is no annotation-related interference between 
+independent splicing events. An obvious disadvantage, however, is that only a part of the 
+sequencing information is being used, one that is related to local alignments at splice junctions, 
+while the reads that are fully contained in exons or in introns are ignored.
 
-In SJPIPE pipeline, the BAM file is read by \prog{sjcount} utility to produce a tab delimited output of splice junction 
-counts with offsets and, additionally, the respective counts of the continuous reads that overlap splice junctions 
-(explained below). This output is aggregated (\prog{aggregate.pl}), matched against genome and annotation (\prog{annotate.pl}), 
-and passed to strand disambiguation (\prog{choose\_strand.pl}). The resulting stranded counts are then subject to the 
-irreproducibility assessment (\prog{npIDR}) and filtering (\prog{filter}). Importantly, this pipeline is designed to 
-work uniformly with
-\begin{itemize}
-\item stranded and unstranded data
-\item data with and without bioreplicates
-\end{itemize}
+SJPIPE pipeline starts with a BAM file, which is processed by \prog{sjcount} utility and converted to a tab-delimited 
+output of {\em multi-split counts with offsets} (see \href{https://github.com/pervouchine/sjcount}{sjcount} documentation 
+for more detail). Additionally, \prog{sjcount} produces counts of the continuous reads that overlap splice junctions.
+These outputs are aggregated, matched against genome and annotation, and passed to strand disambiguation.
+The resulting stranded counts are subject to irreproducibility assessment (npIDR) and subsequent filtering 
+based on IDR, entropy, and staggered alignments. The workflow is unversal for many types of data, i.e., for stranded 
+and unstranded data, for data with and without bioreplicates, etc.
 
-The TXPIPE pipeline quantifies annotated splicing events by analyzing the transcript quantification data produced by some 
-other program. The advantage of this approach is that it deconvolves exon abundancies by taking into account all sequencing 
-data, i.e., not only the local short read distribution at splice junctions, but also the distribution of short reads in exons 
-and introns. This leads to a larger effective sample size compared to that in SJPIPE. A disadvantage, however, is that an 
-unannotated splicing event or a number of annotated dependent splicing events may distort the global splicing pattern significantly 
-and, therefore, there is no guarantee that the inclusion rates of each given exon reflect actual splicing events that occur 
-with the given exon.
+The TXPIPE pipeline assesses the annotated splicing events by analyzing the transcript quantification data produced 
+by some deconvolution program. The advantage of this approach is that it takes into account all sequencing data, i.e., 
+not only local alignments at splice junctions, but also alignments of reads in exons and in introns. This results in 
+a larger effective sample size compared to that in SJPIPE. A disadvantage, however, is that unannotated splicing events
+or dependent splicing events may distort the global splicing pattern significantly and, therefore, there is no guarantee 
+that the inclusion rate of each given exon actually reflects splicing events that occur with the given exon (see examples 
+below).
 
 \begin{figure}
 \centering
-\includegraphics[width=\textwidth]{latex/fig1_crop.pdf}
+\includegraphics[width=\textwidth]{fig1_crop.pdf}
 \caption{The SJPIPE pipeline.\label{fig::sjpipe}}
 \end{figure}
 
@@ -435,8 +432,8 @@ Rscript offset.r <file.tsv> <file.pdf>
 \end{verbatim}
 An example such diagram is shown in Figure~\ref{fig::qc1}.
 \begin{figure}
-\subfloat[Offset distribution\label{fig::qc1}]{\includegraphics[width=0.5\textwidth]{latex/fig2_crop.pdf}}
-\subfloat[Disproportion test\label{fig::qc2}]{\includegraphics[width=0.5\textwidth]{latex/fig3_crop.pdf}}
+\subfloat[Offset distribution\label{fig::qc1}]{\includegraphics[width=0.5\textwidth]{fig2_crop.pdf}}
+\subfloat[Disproportion test\label{fig::qc2}]{\includegraphics[width=0.5\textwidth]{fig3_crop.pdf}}
 \end{figure}
 
 \subsection{Strand disproportion}

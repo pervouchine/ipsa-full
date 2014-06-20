@@ -20,7 +20,7 @@ while($line=<FILE>) {
     $chr = "chr$chr" unless($chr=~/^chr/);
     $eid = join("_", $chr, $beg, $end, $str);
     %attr = get_attributes($attr);
-    foreach $tid(split /\,/, $attr{'belongsto'}) {
+    foreach $tid(split /\,/, $attr{'transcript_id'}) {
 	$TE{$tid}{$eid}++;
     }
     $exon{$chr}{$str}{$beg}{$end}++;
