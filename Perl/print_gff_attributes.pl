@@ -22,3 +22,5 @@ while(<STDIN>) {
     $attr{'INT'} = join("_",@arr[0,3,4,6]);
     print join("\t",@attr{@ARGV}), "\n";
 }
+
+

@@ -35,3 +35,5 @@ while($line=<STDIN>) {
 foreach $id(sort keys(%data)) {
     print join("\t", $id, aggstat(@{$data{$id}})), "\n";
 }
+
+

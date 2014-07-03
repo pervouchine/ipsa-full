@@ -84,3 +84,5 @@ sub abspos {
     return(strand_c2i($str)>0 ? '3' : '5');
 }
 
+
+

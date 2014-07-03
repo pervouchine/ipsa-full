@@ -182,3 +182,5 @@ sub lex {										# the input is two pointers to arrays
     return(@_[0]->[1] > @_[0]->[0] ? $flag : -$flag);					# this changes if the strand in -1 (indirectly checking by array order)
 }
 
+
+

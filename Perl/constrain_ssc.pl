@@ -23,3 +23,5 @@ while($line=<STDIN>) {
         print join("\t", $chr, $pos, $pos, $str, $rest),"\n" if(($strand eq $str || $strand eq '.') && $data{$chr}{$pos}{$str});
     }
 }
+
+

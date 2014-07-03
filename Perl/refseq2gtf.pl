@@ -20,3 +20,5 @@ while($line=<STDIN>) {
 	print join("\t", $chr, $source, 'exon', $beg, $end, '.', $str, '.', set_attributes(transcript_id=>$tid)), "\n";
     }
 }
+
+
