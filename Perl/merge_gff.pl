@@ -34,7 +34,7 @@ foreach $file(keys(%input)) {
 	    $cols{$key}{$name}++;
 	}
     }
-    print STDERR "]\n";
+    print STDERR "] $N\n"; $N++;
     close FILE;
 }
 

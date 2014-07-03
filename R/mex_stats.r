@@ -1,6 +1,6 @@
 suppressPackageStartupMessages(library("optparse"))
 suppressPackageStartupMessages(library("ggplot2"))
-suppressPackageStartupMessages(library("reshape"))
+suppressPackageStartupMessages(library("plyr"))
 
 option_list <- list(make_option(c("-e", "--gff"), help="gff exon table (gff)"),
 		    make_option(c("-i", "--tsv"), help="exon table (tsv)"),
@@ -42,17 +42,15 @@ func2 <- function(data,main="") {
 
 
 pdf(opt$pdf)
-func1(data,'Mini- and micro-exons')
-func2(data,'Mini- and micro-exons')
+func1(data,'Mini-exons')
+func2(data,'Mini-exons')
 unlist(lapply(strsplit(rownames(data), "_"), function(x){as.numeric(x[3]) - as.numeric(x[2]) + 1})) -> l
 func2(data[l<10,],'Micro-exons')
 
-data1 = data[!rownames(data) %in% exons$V1,]
-func1(data1, 'Novel mini- and micro-exons')
-
-
-exons1 = subset(exons, V1 %in% rownames(data))
-hist(exons1$V2, main="position of exon within the gene", xlab="% (0=5'-UTR, 1=3'-UTR)")
+#data1 = data[!rownames(data) %in% exons$V1,]
+#func1(data1, 'Novel mini- and micro-exons')
+#exons1 = subset(exons, V1 %in% rownames(data))
+#hist(exons1$V2, main="position of exon within the gene", xlab="% (0=5'-UTR, 1=3'-UTR)")
 
 dev.off()
 

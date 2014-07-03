@@ -7,7 +7,7 @@ opt <- parse_args(OptionParser(option_list=option_list))
 print(opt$tsv)
 data = read.delim(opt$tsv, header=F)
 print("Aggregating")
-aggregate(data$V6, by=list(data$V5), FUN=sum) -> A
+with(subset(data, V2<2),aggregate(V4, by=list(V3), FUN=sum)) -> A
 colnames(A) = c('offset','count')
 
 pdf(opt$pdf)

@@ -78,7 +78,7 @@ while($line=<STDIN>) {
         $sj_merge{$key}{"$dir$id.A07.gff"}      = $id;
 	$ce_merge{$key}{"$dir$id.B07.gff"}      = $id;
         $me_merge{$key}{"$name.D01.tsv"}        = $id;
-
+	$mm_merge{$key}{"$dir$id.D07.gff"}        = $id;
     }
 
     if($attr{'type'} eq "gff" || $attr{'type'} eq "gtf") { 
@@ -94,6 +94,7 @@ foreach $id(keys(%IDR)) {
 	make(script=>"awk", before=>"'\$\$7>=$entropy && \$\$8>=$status && \$\$10<$idr'", input=>{''=>"$name.A05.$suff.tsv"}, output=>{'>'=>"$name.A06.$suff.tsv"}, endpoint=>'A06');
     }
     make(script=>"zeta.pl", input=>{-ssj=>"$name.A06.ssj.tsv", -ssc=>"$name.A06.ssc.tsv", -annot=>$annot}, output=>{'>'=>"$name.A07.gff"}, between=>"-mincount $mincount", endpoint=>'A07');
+    make(script=>"zeta.pl", input=>{-ssj=>"$name.A06.ssj.tsv", -ssc=>"$name.A06.ssc.tsv", -annot=>"$dir$merge.mex.mixed_models.gff"}, output=>{'>'=>"$name.D07.gff"}, between=>"-mincount $mincount", endpoint=>'D07');
     make(script=>"psicas.pl", input=>{-ssj=>"$name.A06.ssj.tsv", -annot=>$annot}, output=>{'>'=>"$name.B07.gff"}, endpoint=>'B07');
 }
 
@@ -105,6 +106,12 @@ foreach $key(keys(%sj_merge)) {
     make2(script=>"merge_gff.pl", inputs=>{-i=>\%{$sj_merge{$key}}}, outputs=>{-o=>{psi=>  "$dir$name.psi.tsv",   cosi=> "$dir$name.cosi.tsv"}},  endpoint=>"psi");
     make2(script=>"merge_gff.pl", inputs=>{-i=>\%{$sj_merge{$key}}}, outputs=>{-o=>{psi5=> "$dir$name.psi5.tsv",  psi3=> "$dir$name.psi3.tsv"}},  endpoint=>"psi");
     make2(script=>"merge_gff.pl", inputs=>{-i=>\%{$sj_merge{$key}}}, outputs=>{-o=>{cosi5=>"$dir$name.cosi5.tsv", cosi3=>"$dir$name.cosi3.tsv"}}, endpoint=>"cosi");
+}
+
+foreach $key(keys(%mm_merge)) {
+    $name = $key ? $key : $merge;
+    next unless($name);
+    make2(script=>"merge_gff.pl", inputs=>{-i=>\%{$mm_merge{$key}}}, outputs=>{-o=>{psi=>  "$dir$name.mpsi.tsv",   cosi=> "$dir$name.mcosi.tsv"}},  endpoint=>"mex");
 }
 
 foreach $key(keys(%tx_merge)) {
@@ -136,9 +143,12 @@ foreach $key(keys(%me_merge)) {
     next unless($name);
     make2(script=>"mex_merge_tsv.pl", inputs=>{-i=>\%{$me_merge{$key}}}, outputs=>{''=>{'>'=>"$dir$name.mex.tsv"}});
     make(script=>"mex_tsv2exons.pl",  input=>{-exons=>$annot, '<'=>"$dir$name.mex.tsv"}, output=>{'>'=>"$dir$name.mex.exons.tsv"});
-    make(script=>"mex_tsv2models.pl", input=>{-exons=>$annot, '<'=>"$dir$name.mex.tsv"}, output=>{-gff=>"$dir$name.mex.models.gtf", -bed=>"$dir$name.mex.models.bed"}, endpoint=>'mex');
-    make(script=>"transcript_elements.pl", input=>{'<'=>"$dir$name.mex.models.gtf"}, output=>{'>'=>"$dir$name.mex.models.gff"}, before=>'-', endpoint=>'mex');
+    make(script=>"mex_tsv2models.pl", input=>{-exons=>$annot, '<'=>"$dir$name.mex.tsv"}, output=>{-gff=>"$dir$name.mex.models.gtf", -bed=>"$dir$name.mex.models.bed"});
     make(script=>"mex_stats.r", input=>{-i=>"$dir$name.mex.exons.tsv", -e=>$annot}, output=>{-o=>"$dir$name.mex.exons.pdf"}, endpoint=>'mex');
+}
+
+if($merge) {
+    make(script=>"cat", input=>{''=>"$dir$merge.mex.models.gtf $annot"}, output=>{'>'=>"$dir$merge.mex.mixed_models.gff"}, between=>" | perl Perl/transcript_elements.pl -", endpoint=>'mex');
 }
 
 print "all :: psi cosi counts\n";
