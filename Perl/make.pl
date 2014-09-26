@@ -13,7 +13,7 @@ parse_command_line(     dir     => {description=>'the output directory', ifabsen
 			group	=> {description=>'the grouping field for IDR', ifabsent=>'grouping field is absent'},
 			block	=> {description=>'the blocking field for mastertable'},
 			margin  => {description=>'margin for aggregate', default=>5},
-			entropy => {description=>'entropy lower threshold', default=>3},
+			entropy => {description=>'entropy lower threshold', default=>1.5},
 			status  => {description=>'annotation status lower threshold', default=>0},
 			mincount=> {description=>'min number of counts for the denominator', default=>20},
 			idr     => {description=>'IDR upper threshold', default=>0.1},
@@ -134,7 +134,9 @@ foreach $key(keys(%ct_merge)) {
     foreach $suff(keys(%{$ct_merge{$key}})) {
     	make2(script=>"merge_tsv.pl", inputs=>{-i=>\%{$ct_merge{$key}{$suff}}}, outputs=>{''=>{'>'=>fn($name,counts,$suff,tsv)}}, endpoint=>"counts");
     }
-    make(script=>"mkstat.pl", input=>{-i=>join(" ", keys(%{$ct_merge{$key}{'ssj'}}))}, output=>{'>'=>fn($name,'stat',tsv)}, endpoint=>"stat");
+    make2(script=>"mkstat.pl", inputs=>{-i=>\%{$ct_merge{$key}{'ssj'}}}, outputs=>{''=>{'>'=>fn($name,'stat',tsv)}});
+    make(script=>"mkstat_list.pl", input=>{''=>join(" ", keys(%{$ct_merge{$key}{'ssj'}}))}, output=>{'>'=>fn($name,'list',tsv)}, endpoint=>"stat");
+    make(script=>"statcount.r", input=>{-i=>fn($name,'stat',tsv)}, output=>{-o=>fn($name,'stat',pdf)}, endpoint=>"stat");
 }
 
 #######################################################################################################################################################################

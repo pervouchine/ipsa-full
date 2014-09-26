@@ -5,7 +5,7 @@ if(@ARGV==0) {
     print STDERR "This utility takes a REFSEQ tsv annotation (STDIN) and reformats it into a more compact, quickly readable file (STDOUT). Only exons are taken into account.\n";
 }
 
-parse_command_line(source=>{description=>'the content of the source field', default=>'SJPIPE'}, verbose=>{store=>T});
+parse_command_line(source=>{description=>'the content of the source field', default=>'SJPIPE'});
 
 while($line=<STDIN>) {
     chomp $line;
@@ -17,7 +17,7 @@ while($line=<STDIN>) {
 	$beg = $starts[$i];
 	$end = $ends[$i];
 	($beg, $end) =  sort {$a<=>$b} ($beg, $end);
-	print join("\t", $chr, $source, 'exon', $beg, $end, '.', $str, '.', set_attributes(transcript_id=>$tid)), "\n";
+	print join("\t", $chr, $source, 'exon', $beg + 1, $end, '.', $str, '.', set_attributes(transcript_id=>$tid)), "\n";
     }
 }
 

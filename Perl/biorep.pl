@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+use Perl::utils;
 
 $rep = $ARGV[0];
 
@@ -10,15 +11,14 @@ while($line=<FILE>) {
     foreach $elem(@array) {
 	$arm{$elem} = $label;
     }
-    $arm{join(",", @array)} = $label;
+    $arm{join(",", @array[0..1])} = $label;
 }
 close FILE;
 
 while($line=<STDIN>) {
     chomp $line;
     ($file, $attr) = split /\t/, $line;
-    $attr =~ s/\s//g;
-    %attr = split /[;=]+/, $attr;
+    %attr = get_features($attr);
     next unless($arm{$attr{'labExpId'}});
     $line.= " idrGroup=$arm{$attr{'labExpId'}};";
     print "$line\n";

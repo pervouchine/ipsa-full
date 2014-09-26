@@ -4,15 +4,15 @@ use Perl::utils;
 if(@ARGV==0) {
 }
 
-#parse_command_line(i => {description=>'input gtf file name and label', array=>hash});
+parse_command_line(i => {description=>'input gtf file name and label', array=>hash});
 
-#%input  = @i;
+%input  = @i;
 
-#die unless(keys(%input)>0);
+die unless(keys(%input)>0);
 
 @annot = (0,1,2,3);
 
-foreach $file(@ARGV) {
+foreach $file(keys(%input)) {
     $name = $input{$file};
     print STDERR "[$file $name";
     open FILE, $file;
@@ -29,11 +29,11 @@ foreach $file(@ARGV) {
     print STDERR "]", $n++, "\n";
     close FILE;
 }
-## $data{$annot}{$id} : x |-> number of samples with count at least x
+## $data{$annot}{$id} : x -> number of samples with count at least x
 
 ##############################################
 
-foreach $annot(keys(%data)) {
+foreach $annot(sort keys(%data)) {
     print STDERR join("\t", $annot, 0+keys(%{$data{$annot}})), "\n";
 }
 
@@ -46,11 +46,24 @@ foreach $annot(keys(%data)) {
     }
 }
 
+# freq{annot}{x} : n -> # of SJ that have count>=x in exactly n samples  
+
+foreach $annot(keys(%freq)) {
+    foreach $log2count(keys(%{$freq{$annot}})) {
+	foreach $nsp(keys(%{$freq{$annot}{$log2count}})) {
+	    for($i=1; $i<=$nsp; $i++) {
+		$res{$annot}{$log2count}{$i} += $freq{$annot}{$log2count}{$nsp};
+	    }
+	}
+    }
+}
+
+
+
 for($annot=0; $annot<=3; $annot++) {
     for($log2count=0; $log2count<=$maxlog2count; $log2count++) {
-	$s=0;
 	for($nsp=1; $nsp<=$n; $nsp++) {
-	    $s+=$freq{$annot}{$log2count}{$nsp};
+	    $s=$res{$annot}{$log2count}{$nsp}+0;
 	    print join("\t", $annot, $log2count, $nsp, $s), "\n";
 	}
     }
