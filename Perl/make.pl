@@ -54,9 +54,10 @@ while($line=<STDIN>) {
         $target  =~ s/\.bam$//;
         $name = "$target";
 
-	make(script=>$SJCOUNTDIR."sjcount_v3", input=>{-bam=>$file}, output=>{-ssj=>fn($name,A01,ssj,tsv), -ssc=>fn($name,A01,ssc,tsv), -log=>fn($name,A01,ssj,'log')}, 
-	     after=>"-binsize 1 -nbins $readLength $param $stranded -quiet", mkdir=>T, endpoint=>A01);
+	make(script=>$SJCOUNTDIR."sjcount-3.1", input=>{-bam=>$file}, output=>{-ssj=>fn($name,A01,ssj,gz), -ssc=>fn($name,A01,ssc,gz), -log=>fn($name,A01,ssj,'log')}, 
+	     after=>"-nbins $readLength $param $stranded -quiet -gz", mkdir=>T, endpoint=>A01);
 
+##################
 	make(script=>"aggregate1.pl", input=>{'<'=>fn($name,A01,ssj,tsv)}, output=>{'>'=>fn($name,A02,ssj,tsv)}, before=>"-readLength $readLength -margin $margin", endpoint=>A02);
         make(script=>"aggregate2.pl", input=>{'<'=>fn($name,A01,ssc,tsv)}, output=>{'>'=>fn($name,A02,ssc,tsv)}, before=>"-readLength $readLength -margin $margin", endpoint=>A02);
 
