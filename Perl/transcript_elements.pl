@@ -16,7 +16,7 @@ foreach $item (split /\,/, $features) {
     print STDERR "[function $g($f)]\n"; 
 }
 
-print STDERR "[<stdin...";
+print STDERR "[<stdin";
 while($line=<STDIN>) {
     chomp $line;
     ($chr, $src, $element, $beg, $end, $trash, $str, $trash, $attr) = split /\t/, $line;
