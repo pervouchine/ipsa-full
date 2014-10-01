@@ -4,9 +4,9 @@ SJCOUNTDIR=sjcount-3.1/
 
 ###############################################################################################
 
-all :: ${SJCOUNTDIR}sjcount-3.1 ${MAPTOOLSDIR}bin/transf ${MAPTOOLSDIR}bin/getsegm
+all :: ${SJCOUNTDIR}sjcount ${MAPTOOLSDIR}bin/transf ${MAPTOOLSDIR}bin/getsegm
 
-${SJCOUNTDIR}sjcount-3.1 : 
+${SJCOUNTDIR}sjcount : 
 	wget https://github.com/pervouchine/sjcount/archive/v3.1.tar.gz -O v3.1.tar.gz
 	tar -xf v3.1.tar.gz 
 	rm -f v3.1.tar.gz

@@ -15,7 +15,7 @@ parse_command_line(     dir     => {description=>'the output directory', ifabsen
 			margin  => {description=>'margin for aggregate', default=>5},
 			entropy => {description=>'entropy lower threshold', default=>1.5},
 			status  => {description=>'annotation status lower threshold', default=>0},
-			mincount=> {description=>'min number of counts for the denominator', default=>20},
+			mincount=> {description=>'min number of counts for the denominator', default=>10},
 			idr     => {description=>'IDR upper threshold', default=>0.1},
                         annot   => {description=>'the annotation (gtf)', ifabsent=>'annotation not specified'},
 			genome	=> {description=>'the genome (without .dbx or .idx)', ifabsent=>'genome not specified'},
@@ -54,10 +54,9 @@ while($line=<STDIN>) {
         $target  =~ s/\.bam$//;
         $name = "$target";
 
-	make(script=>$SJCOUNTDIR."sjcount-3.1", input=>{-bam=>$file}, output=>{-ssj=>fn($name,A01,ssj,gz), -ssc=>fn($name,A01,ssc,gz), -log=>fn($name,A01,ssj,'log')}, 
-	     after=>"-nbins $readLength $param $stranded -quiet -gz", mkdir=>T, endpoint=>A01);
+	make(script=>$SJCOUNTDIR."sjcount", input=>{-bam=>$file}, output=>{-ssj=>fn($name,A01,ssj,tsv), -ssc=>fn($name,A01,ssc,tsv), -log=>fn($name,A01,ssj,'log')},
+             after=>"-nbins $readLength $param $stranded -quiet", mkdir=>T, endpoint=>A01);
 
-##################
 	make(script=>"aggregate1.pl", input=>{'<'=>fn($name,A01,ssj,tsv)}, output=>{'>'=>fn($name,A02,ssj,tsv)}, before=>"-readLength $readLength -margin $margin", endpoint=>A02);
         make(script=>"aggregate2.pl", input=>{'<'=>fn($name,A01,ssc,tsv)}, output=>{'>'=>fn($name,A02,ssc,tsv)}, before=>"-readLength $readLength -margin $margin", endpoint=>A02);
 

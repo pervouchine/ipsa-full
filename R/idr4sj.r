@@ -50,9 +50,9 @@ if(length(cmd_args)>2) {
     B[is.na(B)]<-0
     A[,7:ncol(A)] = B
     npIDR(A[,c('V5.x','V5.y')]) -> A$idr
-    A$V5 = A$V5.x + A$V5.y
-    A$V6 = A$V6.x + A$V6.y
-    A$V7 = A$V7.x + A$V7.y
+    A$V5 = (A$V5.x + A$V5.y)/2
+    A$V6 = (A$V6.x + A$V6.y)/2
+    A$V7 = (A$V7.x + A$V7.y)/2
 }
 
 print(paste('Saving to', cmd_args[length(cmd_args)]))
