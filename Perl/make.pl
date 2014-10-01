@@ -154,7 +154,7 @@ if($merge) {
     make(script=>"cat", input=>{''=>fn($merge,mex.models,gtf)." $annot"}, output=>{'>'=>fn($merge,mex,mixed_models,gff)}, between=>" | perl Perl/transcript_elements.pl -", endpoint=>'mex');
 }
 
-print "all :: psi cosi mex stat counts\n";
+print "all :: psi cosi stat counts\n";
 
 sub fn {
     return(@_[1]=~/^[A-Z]\d+$/ ? join(undef, $dir, @_[1], "/", join('.', @_)) : join(undef, $dir, join('.', @_)));

@@ -26,8 +26,10 @@ clean ::
 ###############################################################################################
 
 all :: example.mk
+	#
 	# ==> installation completed <==
 	# type 'make run' to execute a test run
+	# 	
 
 run ::	example.mk ${DIR}hg19.idx ${DIR}hg19.dbx ${DIR}hg19v18.gff
 	make -f example.mk all 
