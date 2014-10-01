@@ -38,18 +38,18 @@ ${DIR}gencode.v18.annotation.gtf :
 	wget ftp://ftp.sanger.ac.uk/pub/gencode/release_18/gencode.v18.annotation.gtf.gz -O ${DIR}gencode.v18.annotation.gtf.gz
 	gunzip -f ${DIR}gencode.v18.annotation.gtf.gz
 
-${DIR}chr1.fa :
+${DIR}chr22Y/chr22.fa :
 	mkdir -p ${DIR}
-	wget http://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/chromFa.tar.gz -O ${DIR}chromFa.tar.gz
-	tar -xf ${DIR}chromFa.tar.gz -C ${DIR}
-	rm -f ${DIR}chromFa.tar.gz 
+	wget http://genome.crg.eu/~dmitri/export/ipsa/chr22Y.tar.gz -O ${DIR}chr22Y.tar.gz
+	tar -xf ${DIR}chr22Y.tar.gz -C ${DIR}
+	rm -f ${DIR}chr22Y.tar.gz
 
-${DIR}hg19.idx ${DIR}hg19.dbx : ${DIR}chr1.fa
+${DIR}hg19.idx ${DIR}hg19.dbx : ${DIR}chr22Y/chr22.fa
 	mkdir -p ${DIR}
-	${MAPTOOLSDIR}bin/transf -dir ${DIR}chr1.fa -idx ${DIR}hg19.idx -dbx ${DIR}hg19.dbx
+	${MAPTOOLSDIR}bin/transf -dir ${DIR}chr22Y/chr22.fa -idx ${DIR}hg19.idx -dbx ${DIR}hg19.dbx
 
 ${DIR}hg19v18.gff : ${DIR}gencode.v18.annotation.gtf
-	perl Perl/transcript_elements.pl - < ${DIR}gencode.v18.annotation.gtf > ${DIR}hg19v18.gff
+	awk '$$3=="exon"' ${DIR}gencode.v18.annotation.gtf | perl Perl/transcript_elements.pl - > ${DIR}hg19v18.gff
 
 example.dat : 
 	wget http://genome.crg.eu/~dmitri/export/ipsa/example_ipsa.dat -O example.dat

@@ -8,7 +8,7 @@ if(@ARGV==0) {
 parse_command_line(annot    => {description=>'the annotation (GTF) file', ifunreadable=>'annotation not specified'},
                    ssj      => {description=>'the input ssj (BED) file', ifunreadable=>'input not specified'},
                    ssc      => {description=>'the input ssc (BED) file'},
-		   mincount => {default=>20,  description=>'the min value of the denominator of the fraction'},
+		   mincount => {default=>10,  description=>'the min value of the denominator of the fraction'},
                    stranded => {default=>1,   description=>'1(yes) or 0(no)'}
                   );
 

@@ -16,6 +16,7 @@ foreach $item (split /\,/, $features) {
     print STDERR "[function $g($f)]\n"; 
 }
 
+print STDERR "[<stdin";
 while($line=<STDIN>) {
     chomp $line;
     ($chr, $src, $element, $beg, $end, $trash, $str, $trash, $attr) = split /\t/, $line;
@@ -32,8 +33,11 @@ while($line=<STDIN>) {
     $n++;
     last if($n>$lim && $lim>0);
 }
+print STDERR "]\n";
 
 foreach $tid(keys(%exons)) {
+    $N++;
+    progressbar($N, 0+keys(%exons), "Processing ");
     if(keys(%{$CHR{$tid}})==1 && keys(%{$STR{$tid}})==1) {
 	($chr, $str) = (keys(%{$CHR{$tid}}), keys(%{$STR{$tid}}));
 	@exon_list = sort {$a->[0]<=>$b->[0]} @{$exons{$tid}};
@@ -63,6 +67,9 @@ foreach $tid(keys(%exons)) {
     }
 }
 
+print STDERR "[WARNING: $trans_spliced trans spliced transcripts excluded]" if($trans_spliced);
+
+print STDERR "[>stdout\n";
 foreach $key(sort keys(%feature)) {
     my %res=();
     foreach $f(sort keys(%feature_list)) {
@@ -70,8 +77,7 @@ foreach $key(sort keys(%feature)) {
     }
     print $key, "\t", set_attributes(%res), "\n";
 }
-
-print STDERR "[WARNING: $trans_spliced trans spliced transcripts excluded]" if($trans_spliced);
+print STDERR "]\n";
 
 sub relpos {
     return('NA') unless(@_[0]>=0 && @_[1]>0);
