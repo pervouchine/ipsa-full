@@ -11,7 +11,6 @@ ${SJCOUNTDIR}sjcount :
 	tar -xf v3.1.tar.gz 
 	rm -f v3.1.tar.gz
 	make -C ${SJCOUNTDIR} all
-	make -C ${SJCOUNTDIR} test
 
 ${MAPTOOLSDIR}bin/transf ${MAPTOOLSDIR}bin/getsegm:
 	wget https://github.com/pervouchine/maptools/archive/v2.0.tar.gz -O v2.0.tar.gz
