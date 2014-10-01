@@ -11,6 +11,7 @@ ${SJCOUNTDIR}sjcount :
 	tar -xf v3.1.tar.gz 
 	rm -f v3.1.tar.gz
 	make -C ${SJCOUNTDIR} all
+	make -C ${SJCOUNTDIR} test
 
 ${MAPTOOLSDIR}bin/transf ${MAPTOOLSDIR}bin/getsegm:
 	wget https://github.com/pervouchine/maptools/archive/v2.0.tar.gz -O v2.0.tar.gz
@@ -25,9 +26,12 @@ clean ::
 ###############################################################################################
 
 all :: example.mk
+	# ==> installation completed <==
+	# type 'make run' to execute a test run
 
 run ::	example.mk ${DIR}hg19.idx ${DIR}hg19.dbx ${DIR}hg19v18.gff
-	make -f example.mk all  
+	make -f example.mk all 
+
 clean ::
 	rm -f -r example.dat example.mk
 
@@ -54,6 +58,6 @@ ${DIR}hg19v18.gff : ${DIR}gencode.v18.annotation.gtf
 example.dat : 
 	wget http://genome.crg.eu/~dmitri/export/ipsa/example_ipsa.dat -O example.dat
 
-example.mk : example.dat
+example.mk : example.dat Perl/make.pl
 	perl Perl/make.pl -repository input/ -dir output/ -group idrGroup -param '-read1 0' -annot ${DIR}hg19v18.gff -genome ${DIR}hg19 -merge pooled < example.dat > example.mk
 

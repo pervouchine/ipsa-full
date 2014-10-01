@@ -16,7 +16,7 @@ foreach $item (split /\,/, $features) {
     print STDERR "[function $g($f)]\n"; 
 }
 
-print STDERR "[<stdin";
+print STDERR "[<stdin...";
 while($line=<STDIN>) {
     chomp $line;
     ($chr, $src, $element, $beg, $end, $trash, $str, $trash, $attr) = split /\t/, $line;
@@ -69,7 +69,7 @@ foreach $tid(keys(%exons)) {
 
 print STDERR "[WARNING: $trans_spliced trans spliced transcripts excluded]" if($trans_spliced);
 
-print STDERR "[>stdout\n";
+print STDERR "[>stdout";
 foreach $key(sort keys(%feature)) {
     my %res=();
     foreach $f(sort keys(%feature_list)) {
