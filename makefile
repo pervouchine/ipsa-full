@@ -1,4 +1,4 @@
-DIR=data/example/
+DIR=example/
 MAPTOOLSDIR=maptools-2.0/
 SJCOUNTDIR=sjcount-3.1/
 
@@ -20,21 +20,17 @@ ${MAPTOOLSDIR}bin/transf ${MAPTOOLSDIR}bin/getsegm:
 	make -C ${MAPTOOLSDIR} all
 
 clean ::
-	rm -f -r ${SJCOUNTDIR} ${MAPTOOLSDIR}
+	rm -f -r ${SJCOUNTDIR} ${MAPTOOLSDIR} example.dat example.mk
 
 ###############################################################################################
 
 all :: example.mk
-	#
-	# ==> installation completed <==
-	# type 'make run' to execute a test run
-	# 	
+	# Installation complete. Type 'make run' to execute a test run.
 
 run ::	example.mk ${DIR}hg19.idx ${DIR}hg19.dbx ${DIR}hg19v18.gff
 	make -f example.mk all 
-
-clean ::
-	rm -f -r example.dat example.mk
+	# Test run complete. The output is in the output/ directory.
+	ls -l output/
 
 ###############################################################################################
 
@@ -61,4 +57,6 @@ example.dat :
 
 example.mk : example.dat Perl/make.pl
 	perl Perl/make.pl -repository input/ -dir output/ -group idrGroup -param '-read1 0' -annot ${DIR}hg19v18.gff -genome ${DIR}hg19 -merge pooled < example.dat > example.mk
+
+###############################################################################################
 

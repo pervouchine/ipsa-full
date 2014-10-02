@@ -2,6 +2,7 @@
 use Perl::utils;
 
 if(@ARGV==0) {
+    print STDERR "Merger script for tsv files with SJ counts\n";
 }
 
 parse_command_line(i => {description=>'input gtf file name and label', array=>hash});

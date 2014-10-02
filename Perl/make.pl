@@ -90,7 +90,7 @@ while($line=<STDIN>) {
 foreach $id(keys(%IDR)) {
     $name = "$id";
     foreach $suff(keys(%{$IDR{$id}})) {
-        make(script=>"idr4sj.r", input=>{''=>join(" ", @{$IDR{$id}{$suff}})}, output=>{''=>fn($name,A05,$suff,tsv)}, endpoint=>A05);
+        make(script=>"idr4sj.pl", input=>{''=>join(" ", @{$IDR{$id}{$suff}})}, output=>{'>'=>fn($name,A05,$suff,tsv)}, endpoint=>A05);
 	make(script=>"awk", before=>"'\$\$7>=$entropy && \$\$8>=$status && \$\$10<$idr'", input=>{''=>fn($name,A05,$suff,tsv)}, output=>{'>'=>fn($name,A06,$suff,tsv)}, endpoint=>A06);
     }
     make(script=>"zeta.pl", input=>{-ssj=>fn($name,A06,ssj,tsv), -ssc=>fn($name,A06,ssc,tsv), -annot=>$annot}, output=>{'>'=>fn($name,A07,gff)}, between=>"-mincount $mincount", endpoint=>A07);
