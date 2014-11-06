@@ -30,7 +30,7 @@
 \path[line] (genome.east) -| (ssj6+3+2.north);
 \path[line] (annot.east) -| (ssj6+3+2.north);
 \node [sscfile, below = 2.54cm of ssc6+3] (ssc6+3s) {R1};
-\path[line] let \p1=(bam.south), \p2=(ssj6.north) in (bam.south) --  +(0,0.5*\y2-0.5*\y1) node[below] {\prog{count with offsets}} -| node [pos=0.3, above] {Splice Junctions} (ssj6.north);
+\path[line] let \p1=(bam.south), \p2=(ssj6.north) in (bam.south) --  +(0,0.5*\y2-0.5*\y1) node[below] {\prog{sjcount}} -| node [pos=0.3, above] {Splice Junctions} (ssj6.north);
 \path[line] let \p1=(bam.south), \p2=(ssc6.north) in (bam.south) --  +(0,0.5*\y2-0.5*\y1)  -| node [pos=0.3, above] {Splice sites} (ssc6.north);
 \path[line] (ssj6) -- node [right] {\prog{aggregate}} (ssj6+3);
 \path[line] (ssj6+3) -- node [right] {\prog{annotate}} (ssj6+3+2);

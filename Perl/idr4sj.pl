@@ -41,7 +41,7 @@ foreach $id(keys(%rows)) {
         }
         $absolute{$values[$i]}++;                       # absolute counter incremented always
     }
-    $conditional{$values[$j]}++ if($nzeroes == @values - 1); # conditional counter incremented if zeroes are in all replicas but one
+    $conditional{$values[$j]}++ if($nzeroes == @values - 1 && @values>1); # conditional counter incremented if zeroes are in all replicas but one
 }
 foreach $id(sort keys(%rows)) {
     ($chr, $beg, $end, $str) = split /\_/, $id;

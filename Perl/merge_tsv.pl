@@ -5,9 +5,13 @@ if(@ARGV==0) {
     print STDERR "Merger script for tsv files with SJ counts\n";
 }
 
-parse_command_line(i => {description=>'input gtf file name and label', array=>hash});
+parse_command_line(i   => {description=>'input gtf file name and label', array=>hash},
+		   by  => {description=>'comma separated list of key columns', default=>"1,2,3,4"},
+		   val => {description=>'column with values', default=>'5'},
+		   sep => {description=>'separator',default=>'_'});
 
 %input  = @i;
+@key = split /\,/, $by;
 
 die unless(keys(%input)>0);
 
@@ -16,10 +20,11 @@ foreach $file(keys(%input)) {
     print STDERR "[$file $name";
     open FILE, $file;
     while($line = <FILE>) {
-	($chr, $beg, $end, $str, $count) = split /\t/, $line;
-        $chr = "chr$chr" unless($chr=~/^chr/);
-        $id = "$chr\_$beg\_$end\_$str";
-	$data{$name}{$id} += $count;
+	@array = split /\t/, $line;
+	unshift(@array, undef);
+        #$chr = "chr$chr" unless($chr=~/^chr/);
+        $id = join($sep, @array[@key]);
+	$data{$name}{$id} += $array[$val];
 	$rows{$id}++;
 	$cols{$name}++;
     }

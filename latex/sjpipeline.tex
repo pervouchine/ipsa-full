@@ -60,39 +60,41 @@ below).
 
 
 \section{Detailed description of the components}
+\subsection{RNA dashboard index file}
+An RNA dashboard index file is a two-column tab-delimited text file whose first column contains the file name or a URL, and the second column contains a list of attributes of the form
+{\tt attribute1=value1; attribute2=value2;} etc. 
 
 \subsection{Pipeline generator}
-The \prog{make.pl} utility takes as an input an index file and outputs to the standard output a makefile to be executed to run the pipeline.
+The \prog{make.pl} utility takes as an input the RNA dashboard index file and outputs to the standard output a {\em GNU} makefile that 
+will be executed in order to to run the pipeline.
 \begin{verbatim} 
-make.pl -dir <dirname> -param <params> -by <attribute> -margin 
+Perl/make.pl -dir <dirname> -param <params> -by <attribute> -margin 
           <length> -annot <gtf> -genome <name> -merge <name>
 Inputs: -annot ..., the annotation (gtf), obligatory
-        -block ..., the blocking field for mastertable
-        -dir ..., the output directory, obligatory
-        -entropy ..., entropy lower threshold, default=3
-        -genome ..., the genome (without .dbx or .idx), obligatory
-        -group ..., the grouping field for IDR, obligatory
-        -idr ..., IDR upper threshold, default=0.1
-        -margin ..., margin for aggregate, default=5
-        -merge ..., the name of the output to merge in case if blocks are missing
-        -mincount ..., min number of counts for the denominator, default=20
-        -param ..., parameters passed to sjcount
-        -repository ..., the repository subdirectory for bam files
-        -status ..., annotation status lower threshold, default=0
-        STDIN:  an index file 
-Output: STDOUT: a GNU MAKE makefile
+	-block ..., the blocking field for mastertable
+	-dir ..., the output directory, obligatory
+	-entropy ..., entropy lower threshold, default=1.5
+	-genome ..., the genome (without .dbx or .idx), obligatory
+	-group ..., the grouping field for IDR, obligatory
+	-idr ..., IDR upper threshold, default=0.1
+	-margin ..., margin for aggregate, default=5
+	-merge ..., the name of the output to merge in case if blocks are missing
+	-mincount ..., min number of counts for the denominator, default=10
+	-param ..., parameters passed to sjcount
+	-repository ..., the repository subdirectory for bam files
+	-status ..., annotation status lower threshold, default=0
+        STDIN:  an RNA dashboard index file 
+Output: STDOUT: a GNU makefile
         make -f file.mk all
 \end{verbatim} 
 
 For example, the command
 \begin{verbatim}
-make.pl -dir data/human/ -param '-read1 0 -read2 0' -margin 4 
-          -annot hg19v10.gtf -genome genome/homSap19 
-          -group labExpId -block rnaExtract < index.txt > pipeline.mk
+Perl/make.pl -repository input/ -dir output/ -group idrGroup -param '-read1 0' 
+	-annot hg19v18.gff -genome homSap19 -merge pooled < example.dat > example.mk
 \end{verbatim}
-creates a file called 'pipeline.mk' based on the input from 'index.txt', where all the intermediate steps will be stored in 'data/human/' (needs 
-to created beforehand), with the annotation file hg19v10.gtf in the current directory, and with genome/homSap19.idx and genome/homSap19.dbx both 
-being readable files. The master tables will be named data/human/output*.tsv
+creates a file called 'example.mk' based on the input from 'example.dat', where all the intermediate steps will be stored in 'output/' 
+with the annotation file hg19v18.gtf in the current directory, and with homSap19.idx and homSap19.dbx both being readable genome files.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -101,11 +103,12 @@ being readable files. The master tables will be named data/human/output*.tsv
 \subsubsection{Annotation pre-processing}
 \label{sec::preprocessing}
 
-Genomic annotation files usually come in gtf format and contain many feature types. Often these are large files and it takes time to read such a file. 
-Sometimes they may be incomplete (e.g. contain exons, but not introns). The \prog{transcript\_elements.pl} utility reads such a gtf, extracts only
-exons and transcript identifiers, to which these exons belong, and outputs a shorter form of gtf which contains (1) exons and (2) introns calculated 
-based on the exon information. The format of the output is also gtf, where in the last column (column 9), the 'belongsto' attribute lists the transcripts 
-to which given exon or intron belongs. For example, in the input gtf were
+Genomic annotation files often come in GTF format and contain many feature types simultaneously. Often these are large files and it takes a lot of 
+time just to read them. Sometimes they may be incomplete (e.g. contain exons, but not introns) and not fully correspond to GFF3 standarts.
+
+The \prog{transcript\_elements.pl} utility reads a gtf, extracts only exons, and outputs for each exon the list of transcripts to which this exon 
+belongs. It outputs also a gtf which contains (1) exons and (2) introns inferred from the input exon information, but the output file is shorter.
+For example, in the input gtf were
 \begin{verbatim} 
 ...   ...     ...  ... ... . . . ...      
 chr2L FlyBase exon 100 200 . + . gene_id "8"; transcript_id "1";
@@ -115,22 +118,28 @@ chr2L FlyBase exon 100 200 . + . gene_id "8"; transcript_id "2";
 chr2L FlyBase exon 500 600 . + . gene_id "8"; transcript_id "2"; 
 ...   ...     ...  ... ... . . . ...
 \end{verbatim}
-then the pre-processed, shorter form would have been
+then the processed form would be
 \begin{verbatim} 
-chr2L SJPIPE  exon    100   200   .    +    belongsto "1,2";
-chr2L SJPIPE  intron  200   300   .    +    belongsto "1";
-chr2L SJPIPE  intron  200   500   .    +    belongsto "2";
-chr2L SJPIPE  exon    300   400   .    +    belongsto "1";
-chr2L SJPIPE  intron  400   500   .    +    belongsto "1";
-chr2L SJPIPE  exon    500   600   .    +    belongsto "1,2";
+chr2L SJPIPE  exon    100   200   .    +    transcript_id "1,2";
+chr2L SJPIPE  intron  200   300   .    +    transcript_id "1";
+chr2L SJPIPE  intron  200   500   .    +    transcript_id "2";
+chr2L SJPIPE  exon    300   400   .    +    transcript_id "1";
+chr2L SJPIPE  intron  400   500   .    +    transcript_id "1";
+chr2L SJPIPE  exon    500   600   .    +    transcript_id "1,2";
 \end{verbatim}
-Note that transcripts and introns are not shown in the input gtf. The information contained in the 'belongsto' field will be used only in 
-TXPIPE pipeline to compute splicing indices from transcript quantification (see section~\ref{sec::txpipe}).
+Formally speaking, the script groups transcript id for each exon and applies the function {\em join(",",uniq(sort(...)))} to the sorted array of transcript ids. Similarly,
+the script can group any other feature and apply any other function to the array, as well as it can put any value for the source field, e.g.
+\begin{verbatim}
+Perl/transcript_elements.pl -features transcript_id,source,position:avg
+\end{verbatim}
+will return uniq(transcript\_id), uniq(source), and avg(position) in the column 9 of GTF. Note that transcripts and introns are not shown in the input gtf. 
+The information contained in the 'transcript\_id' field will be used only in TXPIPE pipeline to compute splicing indices from transcript quantification (see 
+section~\ref{sec::txpipe}).
 
 {\bf NB} In what follows, the processed annotation has to be sorted. Therefore it is necessary to pipe it with the sort step as follows.
 
 \begin{verbatim} 
-perl Perl/transcript_elements.pl - < input.gtf | sort -k1,1 -k4,5n > output.gff
+Perl/transcript_elements.pl - < input.gtf | sort -k1,1 -k4,5n > output.gff
 \end{verbatim}
 
 %%%%%%%%%%%%%
@@ -156,30 +165,32 @@ The \prog{getsegm} doesn't have to run on its own. Instead, it is used in \prog{
 \subsection{SJPIPE pipeline}
 
 \subsubsection{Counting splice junctions and reads that overlap splice sites}
-The \prog{sjcount} (v.2.14) utility counts the number of split reads supporting splice junctions (SJ) and continuous reads that overlap splice sites (SS) in a BAM file.
-Splice sites are defined by the splice junctions that are present among the alignments. The utility returns the number of counts for each combination of chromosome, begin, 
-end, strand, and offset, where offset is defined to be the position (within the short read sequence) of the last nucleotide preceding the splice junction. 
-For the exact definitions of SJ, SS, offset, and examples see the help page of \prog{sjcount2} at \href{https://github.com/pervouchine/sjcount}{github}. 
+The \prog{sjcount} utility takes a  BAM file and counts the number of split reads supporting splice junctions (SJ) and continuous reads 
+that overlap splice sites (SS). Splice sites are defined by the splice junctions that are present in the alignments.
+Version v3.1 also counts the abundance of split reads that span multiple junctions.
 
-Regarding continuous reads that overlap splice sites, the current convention is that only the full match ('M' in CIGAR string) is counted as overlapping a splice site 
-(this is needed to get the correct offset). See also \prog{sjcount2} (beta-testing).
+The utility returns the number of counts for each combination of chromosome, begin, end, strand, and offset, where offset is defined to 
+be the position (within the short read sequence) of the last nucleotide preceding the splice junction. For the exact definitions of SJ, SS, 
+offset, and examples see the help page of \prog{sjcount} at \href{https://github.com/pervouchine/sjcount}{github}. 
+
 \begin{verbatim}
 sjcount -bam <file> -ssj <file> -ssc <file> ...
 Input:  a sorted BAM file with a header
-Output: -ssj, splice junction counts, and -ssc, splice site counts 
 Options:
-        -read1 0/1, reverse complement read1 no/yes (default=1)
-        -read2 0/1, reverse complement read2 no/yes (default=0)
-        -nbins number of overhang bins, (default=1)
-        -maxnh, the max value of the NH tag, (default=none)
-        -lim nreads stop after nreads, (default=no limit)
-        -unstranded, force strand=0
-        -quiet, suppress verbose output
-Output columns are: chr, begin, end, strand, offset, count, e.g.
-chr1    100     200     -      10      25
-chr1    100     200     -      11      12
-...     ...     ...     ...     ...     ...
-In the ssc file begin=end=position of splice site
+	-read1 0/1, reverse complement read1 no/yes (default=1)
+	-read2 0/1, reverse complement read2 no/yes (default=0)
+	-nbins number of overhang bins, (default=1)
+	-maxnh, the max value of the NH tag, (default=none)
+	-lim nreads stop after nreads, (default=no limit)
+	-unstranded, force strand to be '.'
+	-continuous, no mismatches when overlapping splice boundaries
+	-gz, gzip output ('.gz' extension will *NOT* be added to output file name)
+	-quiet, suppress verbose output
+
+Output:	-ssj: Splice Junction counts, tab-delimited  (default=stdout)
+	Columns are: path, number_of_splits, offset, count
+	-ssc: Splice boundary counts, tab-delimited  (default=none)
+	Columns are: path, number_of_splits, offset, count
 \end{verbatim}
 {\bf NB: the coordinates are 1-based}
 
@@ -189,7 +200,7 @@ In the ssc file begin=end=position of splice site
 The \prog{aggregate.pl} utility takes the output of \prog{sjcount} on STDIN and performs aggregation by the 5th column (offset) using three different aggregation functions 
 (see examples below). It outputs a TSV file with three extra columns being (5) total count, (6) staggered read count, (7) entropy. The output is sent to \prog{stdout}. 
 \begin{verbatim}
-aggregate.pl   
+Perl/aggregate.pl   
 Input:  TSV (ssj or ssc) on STDIN
 Output: TSV on STDOUT
 Options:
@@ -236,7 +247,7 @@ where $1.28$ is the entropy of the distribution.
 The \prog{annotate.pl} takes an aggregated TSV file (the output of \prog{aggregate.pl}), the genomic annotation, and the genome, and outputs a TSV 
 with two more columns: (8) the annotation status and (9) splice sites. The output is sent to \prog{stdout}.
 \begin{verbatim}
-annotate.pl
+Perl/annotate.pl
 Input:  -in TSV file (the output of aggregate.pl)
         -annot ..., the annotation (gtf), obligatory
         -dbx ..., the genome (dbx), obligatory
@@ -277,7 +288,7 @@ Note that sequence retriever uses the \prog{getsegm} program of the \prog{maptoo
 \subsubsection{Strand choice}
 At this step, a unique value of strand is chosen for each SJ. This is done by \prog{choose\_strand.pl} utility. 
 \begin{verbatim}
-choose_strand.pl
+Perl/choose_strand.pl
 Input:  TSV file on STDIN
 Output: TSV file on STDOUT
 Options:
@@ -311,7 +322,7 @@ chr1   150   200   +     21    2     1.01   0     GTAG
 Since now a unique value of strand is chosen for each SJ, the counts of reads overlapping splice sites have to be constrained to a smaller set of splice sites.
 This is done by \prog{constrain\_ssc.pl} utility.
 \begin{verbatim}
-constrain_ssc.pl
+Perl/constrain_ssc.pl
 Input:  TSV ssc (reads overlapping splice sites) on STDIN
         -ssj = TSV file to constrain to, obligatory
 Output: TSV on STDOUT
@@ -353,7 +364,7 @@ annotated exons, as specified in the annotation file. In contrast, the inclusion
 intact after filtering, but also the annotated SJ are also assessed and reported.
 
 \begin{verbatim}
-zeta.pl -ssj <file> -ssc <file> -annot <gtf>
+Perl/zeta.pl -ssj <file> -ssc <file> -annot <gtf>
 Inputs: -ssj and -ssc = SJ and SS counts in column (5);
         -annot, the annotation (gtf) with exons and introns
 Options:
@@ -392,7 +403,7 @@ of the sum of abundances of transcripts which cover the given exon (i.e., the tr
 exon). Note that this definition doesn't require gene id at all.
 
 \begin{verbatim}
-tx.pl -annot <file> -quant <file>
+Perl/tx.pl -annot <file> -quant <file>
         -annot, the genomic annotation (gtf)
         -quant, the transcript quantification file (gtf/gff)
 \end{verbatim}
@@ -406,12 +417,12 @@ The transcript abundance is defined in the gtf field 9 as 'RPKM' attribute or as
 The \prog{merge\_gff.pl} utility is formally not a part of any pipeline but it can be used to merge the content of a number of gff/gtf 
 files into a square (R-readable) matrix.
 \begin{verbatim}
-merge_gff.pl -i <input_file1> <label_1> ... -i <input_file_n> <label_n>
+Perl/merge_gff.pl -i <input_file1> <label_1> ... -i <input_file_n> <label_n>
              -o feature_1 <output_1> -o feature_2 <output_2> ...
 \end{verbatim}
 The program reads input files specified in the '-i' paramemter (could be many) one by one and selects features specified in '-o' paramemter. For instance,
 \begin{verbatim}
-merge_gff.pl -i cell_line1.gtf HELAS3 -i cell_line2.gtf NHEK 
+Perl/merge_gff.pl -i cell_line1.gtf HELAS3 -i cell_line2.gtf NHEK 
              -o psi result_psi.tsv -o cosi result_cosi.tsv
 \end{verbatim}
 will generate two files, result\_psi.tsv and result\_cosi.tsv, each containing a square table, e.g.,

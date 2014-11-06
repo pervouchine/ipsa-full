@@ -1,9 +1,9 @@
-This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012) (format=pdflatex 2013.5.14)  23 APR 2014 18:02
+This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012) (format=pdflatex 2013.5.14)  31 OCT 2014 12:35
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**latex/fig1.tex
-(./latex/fig1.tex
+**fig1
+(./fig1.tex
 LaTeX2e <2011/06/27>
 Babel <v3.8m> and hyphenation patterns for english, dumylang, nohyphenation, ge
 rman-x-2012-05-30, ngerman-x-2012-05-30, afrikaans, ancientgreek, ibycus, arabi
@@ -463,7 +463,7 @@ File: pgflibraryarrows.code.tex 2008/10/27 v2.10 (rcs-revision 1.9)
 (/nfs/software/rg/el6.3/texlive/2012/texmf-dist/tex/generic/pgf/frontendlayer/t
 ikz/libraries/tikzlibrarypositioning.code.tex
 File: tikzlibrarypositioning.code.tex 2008/10/06 v2.10 (rcs-revision 1.7)
-) (latex//fig1.aux)
+) (./fig1.aux)
 \openout1 = `fig1.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 17.
@@ -563,20 +563,20 @@ Overfull \hbox (101.16815pt too wide) in paragraph at lines 58--59
 [1
 
 {/nfs/software/rg/el6.3/texlive/2012/texmf-var/fonts/map/pdftex/updmap/pdftex.m
-ap}] (latex//fig1.aux) ) 
+ap}] (./fig1.aux) ) 
 Here is how much of TeX's memory you used:
- 12027 strings out of 493481
- 253886 string characters out of 3135826
- 332512 words of memory out of 3000000
+ 12025 strings out of 493481
+ 253823 string characters out of 3135826
+ 332503 words of memory out of 3000000
  15090 multiletter control sequences out of 15000+200000
  6097 words of font info for 23 fonts, out of 3000000 for 9000
  957 hyphenation exceptions out of 8191
- 56i,6n,61p,450b,621s stack positions out of 5000i,500n,10000p,200000b,50000s
-</nfs/software/rg/el6.3/texlive/2012/texmf-dist/fonts/t
-ype1/public/amsfonts/cm/cmitt10.pfb></nfs/software/rg/el6.3/texlive/2012/texmf-
-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></nfs/software/rg/el6.3/texlive/20
-12/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb>
-Output written on latex//fig1.pdf (1 page, 32198 bytes).
+ 56i,6n,61p,440b,621s stack positions out of 5000i,500n,10000p,200000b,50000s
+</nfs/software/rg/el6.3/texlive/2012/texmf-dist/fonts/type1/
+public/amsfonts/cm/cmitt10.pfb></nfs/software/rg/el6.3/texlive/2012/texmf-dist/
+fonts/type1/public/amsfonts/cm/cmr8.pfb></nfs/software/rg/el6.3/texlive/2012/te
+xmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb>
+Output written on fig1.pdf (1 page, 32088 bytes).
 PDF statistics:
  23 PDF objects out of 1000 (max. 8388607)
  16 compressed objects within 1 object stream
