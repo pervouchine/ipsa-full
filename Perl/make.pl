@@ -98,6 +98,9 @@ foreach $id(keys(%IDR)) {
         make(script=>"idr4sj.pl", input=>{''=>join(" ", @{$IDR{$id}{$suff}})}, output=>{'>'=>fn($name,A05,$suff,tsv)}, endpoint=>A05);
 	make(script=>"awk", before=>"'\$\$4>=$entropy && \$\$5>=$status && \$\$7<$idr'", input=>{''=>fn($name,A05,$suff,tsv)}, output=>{'>'=>fn($name,A06,$suff,tsv)}, endpoint=>A06);
     }
+    make(script=>'tsv2bed.pl', input=>{'<'=>fn($name,A06,ssj,tsv)}, output=>{'>'=>fn($name,E06,ssj,bed)}, between=>"-extra 2,3,4,5,6,7", endpoint=>E06);
+    make(script=>'tsv2gff.pl', input=>{'<'=>fn($name,A06,ssj,tsv)}, output=>{'>'=>fn($name,E06,ssj,gff)}, between=>"-o count 2 -o stagg 3 -o entr 4 -o annot 5 -o nucl 6 -o IDR 7", endpoint=>E06);
+
     $Annot = fn($merge,mex,mixed_models,gff);
     make(script=>"zeta.pl", input=>{-ssj=>fn($name,A06,ssj,tsv), -ssc=>fn($name,A06,ssc,tsv), -annot=>$annot}, output=>{'>'=>fn($name,A07,gff)}, between=>"-mincount $mincount", endpoint=>A07);
     make(script=>"zeta.pl", input=>{-ssj=>fn($name,A06,ssj,tsv), -ssc=>fn($name,A06,ssc,tsv), -annot=>$Annot}, output=>{'>'=>fn($name,D07,gff)}, between=>"-mincount $mincount", endpoint=>D07);
