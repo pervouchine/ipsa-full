@@ -32,6 +32,8 @@ while($line=<STDIN>) {
 
     $id  = join("_", @attr{@group});	# grouping id for IDR
     $key = join("_", @attr{@block});	# blocking id for merge
+    $key = $merge if($merge);
+    next unless($id && $key);
 
     if($attr{'type'} eq "bam" && $attr{'view'}=~/^Alignments/) {
 
@@ -57,33 +59,36 @@ while($line=<STDIN>) {
 	make(script=>$SJCOUNTDIR."sjcount", input=>{-bam=>$file}, output=>{-ssj=>fn($name,A01,ssj,tsv), -ssc=>fn($name,A01,ssc,tsv), -log=>fn($name,A01,ssj,'log')},
              after=>"-nbins $readLength $param $stranded -quiet", mkdir=>T, endpoint=>A01);
 
-	make(script=>"aggregate1.pl", input=>{'<'=>fn($name,A01,ssj,tsv)}, output=>{'>'=>fn($name,A02,ssj,tsv)}, before=>"-readLength $readLength -margin $margin", endpoint=>A02);
-        make(script=>"aggregate2.pl", input=>{'<'=>fn($name,A01,ssc,tsv)}, output=>{'>'=>fn($name,A02,ssc,tsv)}, before=>"-readLength $readLength -margin $margin", endpoint=>A02);
+	$prm = "-readLength $readLength -margin $margin -name $name";
+	make(script=>"aggregate.pl", input=>{'<'=>fn($name,A01,ssj,tsv)}, output=>{'>'=>fn($name,A02,ssj,tsv), -logfile=>fn($name,A02,ssj,'log')}, before=>"$prm -deg 1", endpoint=>A02);
+        make(script=>"aggregate.pl", input=>{'<'=>fn($name,A01,ssc,tsv)}, output=>{'>'=>fn($name,A02,ssc,tsv), -logfile=>fn($name,A02,ssc,'log')}, before=>"$prm -deg 0", endpoint=>A02);
 
 	make(script=>"annotate.pl",      input=>{-in=>fn($name,A02,ssj,tsv), -annot=>$annot, -dbx=>"$genome.dbx", -idx=>"$genome.idx"}, output=>{'>'=>fn($name,A03,ssj,tsv)}, endpoint=>A03);
-	make(script=>"choose_strand.pl", input=>{'<'=>fn($name,A03,ssj,tsv)}, output=>{'>'=>fn($name,A04,ssj,tsv)}, before=>"-", endpoint=>A04);
+	make(script=>"choose_strand.pl", input=>{'<'=>fn($name,A03,ssj,tsv)}, output=>{'>'=>fn($name,A04,ssj,tsv), -logfile=>fn($name,A04,ssj,'log')}, before=>"-", endpoint=>A04);
 	make(script=>"constrain_ssc.pl", input=>{'<'=>fn($name,A02,ssc,tsv),-ssj=>fn($name,A04,ssj,tsv)}, output=>{'>'=>fn($name,A04,ssc,tsv)}, endpoint=>A04);	
 
 	foreach $suff(@suffixes) {
 	    push @{$IDR{$id}{$suff}}, fn($name,A04,$suff,tsv);
-	    make(script=>"offset.r", input=>{-t=>fn($name,A01,$suff,tsv)}, output=>{-p=>fn($name,A01,$suff,pdf)}, endpoint=>QC1);
-	    $ct_merge{$key}{$suff}{fn($id,A06,$suff,tsv)}  = $id;
 	}
 
-	make(script=>"disproportion.r", input=>{-i=>fn($name,A02,ssj,tsv)}, output=>{-o=>fn($name,A02,ssj,pdf)}, endpoint=>QC2);
-	make(script=>"sjstat.r", input=>{-i=>fn($name,A04,ssj,tsv)}, output=>{'>'=>fn($name,A04,ssj,'log')}, endpoint=>QC3);
+	$merge_tsv{A}{ssj}{$key}{fn($id,A06,ssj,tsv)} = $id;
+	$merge_tsv{A}{ssc}{$key}{fn($id,A06,ssc,tsv)} = $id;
+	$merge_tsv{D}{mex}{$key}{fn($name,D02,tsv)} = $id;
 
-        make(script=>"aggregate3.pl", input=>{'<'=>fn($name,A01,ssj,tsv),-ssj=>fn($name,A04,ssj,tsv)}, output=>{'>'=>fn($name,D01,tsv)}, endpoint=>D01, mkdir=>T);
+	$mk_stat{A}{ssj}{$key}{fn($id,A06,ssj,tsv)} = $id;
 
-        $sj_merge{$key}{fn($id,A07,gff)}   = $id;
-	$ce_merge{$key}{fn($id,B07,gff)}   = $id;
-        $me_merge{$key}{fn($name,D01,tsv)} = $id;
-	$mm_merge{$key}{fn($id,D07,gff)}   = $id;
+        make(script=>"aggregate.pl",     input=>{'<'=>fn($name,A01,ssj,tsv)}, output=>{'>'=>fn($name,D01,tsv)},  before=>"$prm -deg 2", endpoint=>D01);
+	make(script=>"constrain_mex.pl", input=>{-ssj=>fn($name,A04,ssj,tsv), '<'=>fn($name,D01,tsv)}, output=>{'>'=>fn($name,D02,tsv)}, endpoint=>D02);
+
+	$merge_gff{A}{'psi,cosi'}{$key}{fn($id,A07,gff)} = $id;
+	$merge_gff{A}{'psi5,psi3'}{$key}{fn($id,A07,gff)} = $id;
+	$merge_gff{A}{'cosi5,cosi3'}{$key}{fn($id,A07,gff)} = $id;
+	$merge_gff{B}{'psicas'}{$key}{fn($id,B07,gff)} = $id;
     }
 
     if($attr{'type'} eq "gff" || $attr{'type'} eq "gtf") { 
-        make(script=>"tx.pl", input=>{-quant=>$file, -annot=>$annot}, output=>{'>'=>fn($id,C07,gff)}, endpoint=>C07, mkdir=>T);
-	$tx_merge{$key}{fn($id,C07,gff)} = $id;
+        make(script=>"tx.pl", input=>{-quant=>$file, -annot=>$annot}, output=>{'>'=>fn($id,C07,gff)}, endpoint=>C07);
+	$merge_gff{C}{psitx}{fn($id,C07,gff)} = $id;
     }
 }
 
@@ -91,22 +96,50 @@ foreach $id(keys(%IDR)) {
     $name = "$id";
     foreach $suff(keys(%{$IDR{$id}})) {
         make(script=>"idr4sj.pl", input=>{''=>join(" ", @{$IDR{$id}{$suff}})}, output=>{'>'=>fn($name,A05,$suff,tsv)}, endpoint=>A05);
-	make(script=>"awk", before=>"'\$\$7>=$entropy && \$\$8>=$status && \$\$10<$idr'", input=>{''=>fn($name,A05,$suff,tsv)}, output=>{'>'=>fn($name,A06,$suff,tsv)}, endpoint=>A06);
+	make(script=>"awk", before=>"'\$\$4>=$entropy && \$\$5>=$status && \$\$7<$idr'", input=>{''=>fn($name,A05,$suff,tsv)}, output=>{'>'=>fn($name,A06,$suff,tsv)}, endpoint=>A06);
     }
+    $Annot = fn($merge,mex,mixed_models,gff);
     make(script=>"zeta.pl", input=>{-ssj=>fn($name,A06,ssj,tsv), -ssc=>fn($name,A06,ssc,tsv), -annot=>$annot}, output=>{'>'=>fn($name,A07,gff)}, between=>"-mincount $mincount", endpoint=>A07);
-    make(script=>"zeta.pl", input=>{-ssj=>fn($name,A06,ssj,tsv), -ssc=>fn($name,A06,ssc,tsv), -annot=>fn($merge,mex,mixed_models,gff)}, output=>{'>'=>fn($name,D07,gff)}, between=>"-mincount $mincount", endpoint=>D07);
+    make(script=>"zeta.pl", input=>{-ssj=>fn($name,A06,ssj,tsv), -ssc=>fn($name,A06,ssc,tsv), -annot=>$Annot}, output=>{'>'=>fn($name,D07,gff)}, between=>"-mincount $mincount", endpoint=>D07);
     make(script=>"psicas.pl", input=>{-ssj=>fn($name,A06,ssj,tsv), -annot=>$annot}, output=>{'>'=>fn($name,B07,gff)}, endpoint=>B07);
 }
 
 #######################################################################################################################################################################
 
-foreach $key(keys(%sj_merge)) {
-    $name = $key ? $key : $merge;
-    next unless($name);
-    make2(script=>"merge_gff.pl", inputs=>{-i=>\%{$sj_merge{$key}}}, outputs=>{-o=>{psi=>  fn($name,psi,tsv),   cosi=> fn($name,cosi,tsv)}},  endpoint=>"psi");
-    make2(script=>"merge_gff.pl", inputs=>{-i=>\%{$sj_merge{$key}}}, outputs=>{-o=>{psi5=> fn($name,psi5,tsv),  psi3=> fn($name,psi3,tsv)}},  endpoint=>"psi");
-    make2(script=>"merge_gff.pl", inputs=>{-i=>\%{$sj_merge{$key}}}, outputs=>{-o=>{cosi5=>fn($name,cosi5,tsv), cosi3=>fn($name,cosi3,tsv)}}, endpoint=>"cosi");
+
+foreach $endpoint(keys(%merge_tsv)) {
+    foreach $arm(keys(%{$merge_tsv{$endpoint}})) {
+    	foreach $key(keys(%{$merge_tsv{$endpoint}{$arm}})) {
+	    make2(script=>"merge_tsv.pl", inputs=>{-i=>\%{$merge_tsv{$endpoint}{$arm}{$key}}}, outputs=>{''=>{'>'=>fn($key,counts,$arm,tsv)}}, endpoint=>$endpoint);
+	}
+    }
 }
+
+foreach $endpoint(keys(%mk_stat)) { 
+    foreach $arm(keys(%{$mk_stat{$endpoint}})) { 
+        foreach $key(keys(%{$mk_stat{$endpoint}{$arm}})) { 
+            make2(script=>"mk_stat.pl", inputs=>{-i=>\%{$mk_stat{$endpoint}{$arm}{$key}}}, outputs=>{''=>{'>'=>fn($key,stats,$arm,tsv)}}, endpoint=>$endpoint);
+	    make(script=>"mk_stat.r", input=>{-i=>fn($key,stats,$arm,tsv)}, output=>{-o=>fn($key,stats,$arm,pdf)}, endpoint=>stats);
+        }
+    }
+}
+
+foreach $endpoint(keys(%merge_gff)) {
+    foreach $arms(keys(%{$merge_gff{$endpoint}})) {
+    	foreach $key(keys(%{$merge_gff{$endpoint}{$arms}})) {
+	    %outputs=();
+	    foreach $arm(split /\,/, $arms) {
+	    	$outputs{$arm} = fn($key,$arm,tsv);
+	    }
+            make2(script=>"merge_gff.pl", inputs=>{-i=>\%{$merge_gff{$endpoint}{$arms}{$key}}}, outputs=>{-o=>\%outputs}, endpoint=>$endpoint);
+	}
+    }
+}
+
+print "all :: A D\n";
+
+#######################################################################################################################################################################
+exit;
 
 foreach $key(keys(%mm_merge)) {
     $name = $key ? $key : $merge;
@@ -114,37 +147,17 @@ foreach $key(keys(%mm_merge)) {
     make2(script=>"merge_gff.pl", inputs=>{-i=>\%{$mm_merge{$key}}}, outputs=>{-o=>{psi=>  fn($name,mpsi,tsv),   cosi=> fn($name,mcosi,tsv)}},  endpoint=>"mex");
 }
 
-foreach $key(keys(%tx_merge)) {
-    $name = $key ? $key : $merge;
-    next unless($name);
-    make2(script=>"merge_gff.pl", inputs=>{-i=>\%{$tx_merge{$key}}}, outputs=>{-o=>{psi=>fn($name,psitx,tsv)}},endpoint=>"psitx");
-}
-
-#######################################################################################################################################################################
-
-foreach $key(keys(%ce_merge)) {
-    $name = $key ? $key : $merge;
-    next unless($name);
-    make2(script=>"merge_gff.pl", inputs=>{-i=>\%{$ce_merge{$key}}}, outputs=>{-o=>{psi=> fn($name,psicas,tsv)}},  endpoint=>"psicas");
-}
-
 foreach $key(keys(%ct_merge)) {
     $name = $key ? $key : $merge;
     next unless($name);
-    foreach $suff(keys(%{$ct_merge{$key}})) {
-    	make2(script=>"merge_tsv.pl", inputs=>{-i=>\%{$ct_merge{$key}{$suff}}}, outputs=>{''=>{'>'=>fn($name,counts,$suff,tsv)}}, endpoint=>"counts");
-    }
     make2(script=>"mkstat.pl", inputs=>{-i=>\%{$ct_merge{$key}{'ssj'}}}, outputs=>{''=>{'>'=>fn($name,'stat',tsv)}});
     make(script=>"mkstat_list.pl", input=>{''=>join(" ", keys(%{$ct_merge{$key}{'ssj'}}))}, output=>{'>'=>fn($name,'list',tsv)}, endpoint=>"stat");
     make(script=>"statcount.r", input=>{-i=>fn($name,'stat',tsv)}, output=>{-o=>fn($name,'stat',pdf)}, endpoint=>"stat");
 }
 
-#######################################################################################################################################################################
-
 foreach $key(keys(%me_merge)) {
     $name = $key ? $key : $merge;
     next unless($name);
-    make2(script=>"mex_merge_tsv.pl", inputs=>{-i=>\%{$me_merge{$key}}}, outputs=>{''=>{'>'=>fn($name,mex,tsv)}});
     make(script=>"mex_tsv2exons.pl",  input=>{-exons=>$annot, '<'=>fn($name,mex,tsv)}, output=>{'>'=>fn($name,mex.exons,tsv)});
     make(script=>"mex_tsv2models.pl", input=>{-exons=>$annot, '<'=>fn($name,mex,tsv)}, output=>{-gff=>fn($name,mex.models,gtf), -bed=>fn($name,mex.models,bed)});
     make(script=>"mex_stats.r", input=>{-i=>fn($name,mex.exons,tsv), -e=>$annot}, output=>{-o=>fn($name,mex.exons,pdf)}, endpoint=>'mex');

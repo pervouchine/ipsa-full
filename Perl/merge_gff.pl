@@ -20,7 +20,7 @@ die unless(keys(%output)>0 && keys(%input)>0);
 
 foreach $file(keys(%input)) {
     $name = $input{$file};
-    print STDERR "[$file $name";
+    print STDERR "[",++$N,":$file $name";
     open FILE, $file;
     while($line = <FILE>) {
 	($chr, $source, $feature, $beg, $end, $score, $str, $frame, $attr) = split /\t/, $line;
@@ -34,7 +34,7 @@ foreach $file(keys(%input)) {
 	    $cols{$key}{$name}++;
 	}
     }
-    print STDERR "] $N\n"; $N++;
+    print STDERR "]\n"; 
     close FILE;
 }
 

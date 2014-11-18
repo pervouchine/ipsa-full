@@ -14,9 +14,7 @@ foreach $file(@input) {
     open FILE, $file;
     while($line = <FILE>) {
 	chomp $line;
-	($chr, $beg, $end, $str, $count, $stagg, $entrp, $annot, $nucl) = split /\t/, $line;
-        $chr = "chr$chr" unless($chr=~/^chr/);
-        $id = "$chr\_$beg\_$end\_$str";
+	($id, $count, $stagg, $entrp, $annot, $nucl) = split /\t/, $line;
 	push @{$val{$id}}, $count;
 	$count{$id} += $count;
 	$stagg{$id} += $stagg;
@@ -44,8 +42,7 @@ foreach $id(keys(%rows)) {
     $conditional{$values[$j]}++ if($nzeroes == @values - 1 && @values>1); # conditional counter incremented if zeroes are in all replicas but one
 }
 foreach $id(sort keys(%rows)) {
-    ($chr, $beg, $end, $str) = split /\_/, $id;
     $idr = sprintf("%.4lf", $absolute{$count{$id}} ? $conditional{$count{$id}}/$absolute{$count{$id}} : 0);
     $idr =~ s/\.*0+$//;
-    print join("\t", $chr, $beg, $end, $str, $count{$id}/$n, $stagg{$id}/$n, $entrp{$id}/$n, @{$prm{$id}}, $idr), "\n";
+    print join("\t", $id, $count{$id}/$n, $stagg{$id}/$n, $entrp{$id}/$n, @{$prm{$id}}, $idr), "\n";
 }

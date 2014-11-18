@@ -6,8 +6,8 @@ if(@ARGV==0) {
 }
 
 parse_command_line(i   => {description=>'input gtf file name and label', array=>hash},
-		   by  => {description=>'comma separated list of key columns', default=>"1,2,3,4"},
-		   val => {description=>'column with values', default=>'5'},
+		   by  => {description=>'comma separated list of key columns', default=>"1"},
+		   val => {description=>'column with values', default=>'2'},
 		   sep => {description=>'separator',default=>'_'});
 
 %input  = @i;
@@ -17,7 +17,7 @@ die unless(keys(%input)>0);
 
 foreach $file(keys(%input)) {
     $name = $input{$file};
-    print STDERR "[$file $name";
+    print STDERR "[",++$N,":$file $name";
     open FILE, $file;
     while($line = <FILE>) {
 	@array = split /\t/, $line;
@@ -28,7 +28,7 @@ foreach $file(keys(%input)) {
 	$rows{$id}++;
 	$cols{$name}++;
     }
-    print STDERR "]", ++$n, "\n";
+    print STDERR "]\n";
     close FILE;
 }
 

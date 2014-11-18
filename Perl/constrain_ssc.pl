@@ -10,17 +10,17 @@ parse_command_line(ssj => {description=>'input ssj with constraints', ifunreadab
 open FILE, "<$ssj" || die;
 while($line=<FILE>) {
     chomp $line;
-    ($chr, $beg, $end, $str, $rest) = split /\t/, $line, 5;
+    ($chr, $beg, $end, $str, $rest) = split /[\_\t]/, $line, 5;
     $data{$chr}{$beg}{$str}=1;
     $data{$chr}{$end}{$str}=1;
 }
 close FILE;
 
 while($line=<STDIN>) {
-    chomp $line;
-    ($chr, $pos, $trash, $strand, $rest) = split /\t/, $line, 5;
+    ($id, $rest) = split /\t/, $line, 2;
+    ($chr, $pos, $strand) = split /\_/, $id;
     foreach $str("+", "-") {
-        print join("\t", $chr, $pos, $pos, $str, $rest),"\n" if(($strand eq $str || $strand eq '.') && $data{$chr}{$pos}{$str});
+        print $line if(($strand eq $str || $strand eq '.') && $data{$chr}{$pos}{$str});
     }
 }
 

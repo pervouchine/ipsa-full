@@ -19,7 +19,8 @@ print STDERR "[<$ssj";
 open FILE, $ssj || die();
 while($line=<FILE>) {
     chomp $line;
-    ($chr, $beg, $end, $s) = split /\t/, $line;
+    ($id, $count) = split /\t/, $line;
+    ($chr, $beg, $end, $s) = split /\_/, $id;
     $chr = "chr$chr" unless($chr=~/^chr/);
     $str = strand_c2i($s) * $stranded;
     $site{$chr}{$str}{$beg} = 1;
@@ -72,7 +73,8 @@ print STDERR "[<$ssj";
 open FILE, $ssj || die("Can't open $ssj\n");
 while($line=<FILE>) {
     chomp $line;
-    ($chr, $beg, $end, $s, $count) = split /\t/, $line;
+    ($id, $count) = split /\t/, $line;
+    ($chr, $beg, $end, $s) = split /\_/, $id;
     $chr = "chr$chr" unless($chr=~/^chr/);
     $str = strand_c2i($s) * $stranded;
     $start = $index{$chr}{$str}{$beg}; 		# index of the left side of SJ
@@ -106,7 +108,8 @@ if(-e $ssc) {
     open FILE, $ssc || die();
     while($line=<FILE>) {
     	chomp $line;
-    	($chr, $pos, $trash, $s, $count) = split /\t/, $line;
+	($id, $count) = split /\t/, $line;
+    	($chr, $pos, $s) = split /\_/, $id;
 	$str = strand_c2i($s) * $stranded;
         $loc = $index{$chr}{$str}{$pos};
 	next unless($loc);

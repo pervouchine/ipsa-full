@@ -17,9 +17,7 @@ foreach $file(keys(%input)) {
     print STDERR "[$file $name";
     open FILE, $file;
     while($line = <FILE>) {
-	($chr, $beg, $end, $str, $count, $stag, $entropy, $annot, $nucl) = split /\t/, $line;
-        $chr = "chr$chr" unless($chr=~/^chr/);
-        $id = "$chr\_$beg\_$end\_$str";
+	($id, $count, $stag, $entropy, $annot, $nucl) = split /\t/, $line;
 	$log2count = int(log($count)/log(2));
 	for($i=0; $i<=$log2count; $i++) {
 	    $data{$annot}{$id}{$i}++;
@@ -29,13 +27,18 @@ foreach $file(keys(%input)) {
     print STDERR "]", $n++, "\n";
     close FILE;
 }
-## $data{$annot}{$id} : x -> number of samples with count at least x
 
+##############################################
+# $data{$annot}{$id} : x -> number of samples with log2count >= x
 ##############################################
 
 foreach $annot(sort keys(%data)) {
     print STDERR join("\t", $annot, 0+keys(%{$data{$annot}})), "\n";
 }
+
+##############################################
+# freq{annot}{x} : n -> # of SJ that have count>=x in exactly n samples 
+##############################################
 
 foreach $annot(keys(%data)) {
     foreach $id(keys(%{$data{$annot}})) {
@@ -46,7 +49,9 @@ foreach $annot(keys(%data)) {
     }
 }
 
+##############################################
 # freq{annot}{x} : n -> # of SJ that have count>=x in exactly n samples  
+##############################################
 
 foreach $annot(keys(%freq)) {
     foreach $log2count(keys(%{$freq{$annot}})) {
@@ -58,8 +63,6 @@ foreach $annot(keys(%freq)) {
     }
 }
 
-
-
 for($annot=0; $annot<=3; $annot++) {
     for($log2count=0; $log2count<=$maxlog2count; $log2count++) {
 	for($nsp=1; $nsp<=$n; $nsp++) {
@@ -68,11 +71,3 @@ for($annot=0; $annot<=3; $annot++) {
 	}
     }
 }
-
-#foreach $annot(keys(%data)) {
-#    foreach $log2count(keys(%{$freq{$annot}})) {
-#	foreach $nsp(keys(%{$freq{$annot}{$log2count}})) {
-#	    print join("\t", $annot, $log2count, $nsp, $freq{$annot}{$log2count}{$nsp}), "\n";
-#	}
-#    }
-#}

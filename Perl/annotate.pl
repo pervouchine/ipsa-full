@@ -11,39 +11,44 @@ parse_command_line(	in	=> {description=>'the input tsv file', ifunreadable=>'inp
 			annot	=> {description=>'the annotation (gtf)', ifunreadable=>'annotation not specified'}, 
 			dbx	=> {description=>'the genome (dbx)', ifunreadable=>'dbx not specified'},
                         idx     => {description=>'the genome (idx)', ifunreadable=>'idx not specified'},
+			logfile => {description=>'name of the log file'},
 			MAPTOOLSDIR  =>{variable=>T, ifabsent=>'MAPTOOLSDIR not specified'});
 
 
 
-open FILE, $annot || die;
-while($line=<FILE>) {
-    chomp $line;
-    ($chr, $source, $feature, $beg, $end, $score, $str, $frame, $group) = split /\t/, $line;
-    next unless($feature eq "intron");
-    $sj{$chr}{$beg}{$end}{$str}++;
-    $ss{$chr}{$beg}{$str}++;
-    $ss{$chr}{$end}{$str}++;
-}
-close FILE;
+read_annot_intr($annot);
 
-$program = $MAPTOOLSDIR."bin/getsegm -limit 4 -margins -1 0 -spacer 0 -inp_type 1 -out_type 1";
+$program = $MAPTOOLSDIR."bin/getsegm -limit 4 -margins -1 0 -spacer 0 -inp_type 2 -out_type 1";
 %seq = split /[\t\n]/, `$program -dbx $dbx -idx $idx -in $in`;
 
 open FILE, $in || die;
 while($line=<FILE>) {
     chomp $line;
-    ($chr, $beg, $end, $strand, $rest) = split /\t/, $line, 5;
+    ($id, $count, $rest) = split /\t/, $line, 3;
+    ($chr, $beg, $end, $strand) = split /\_/, $id;
     foreach $str("+", "-") {
 	if($strand eq $str || $strand eq '.') {	
-	    $status = $sj{$chr}{$beg}{$end}{$str} ? 3 : ($ss{$chr}{$beg}{$str} && $ss{$chr}{$end}{$str} ? 2 : ($ss{$chr}{$beg}{$str} || $ss{$chr}{$end}{$str} ? 1 : 0));
-	    $nucl   = $seq{join("_",$chr, $beg, $end, $str)};
+	    $status = annot_status($chr,$beg,$end,$str);
+	    $nucl   = $seq{$id};
 	    $nucl   = "NA" unless($nucl);
 	    $nucl =~ tr/[a-z]/[A-Z]/;
-	    print join("\t", $chr, $beg, $end, $str, $rest, $status, $nucl), "\n";
+	    print join("\t", $id, $count, $rest, $status, $nucl), "\n";
+	    $stat1{$status}{$nucl}++;
+	    $stat2{$status}{$nucl}+=$count;
 	}
     }
 }
 close FILE;
+
+if($logfile) {
+    open FILE, ">$logfile";
+    foreach $status(sort keys(%stat1)) {
+	foreach $nucl(sort keys(%{$stat1{$status}})) {
+	    print FILE join("\t", $logfile, $status, $nucl, $stat1{$status}{$nucl}, $stat2{$status}{$nucl});
+	}
+    }
+    close FILE;
+}
 
 
 
