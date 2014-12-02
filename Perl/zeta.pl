@@ -5,7 +5,8 @@ if(@ARGV==0) {
     print STDERR "This utility computes (a) the global exon inclusion and processing rates for a given set of annotated exons and (b) inclusion and processing rates of SJs\n";
 }
 
-parse_command_line(annot    => {description=>'the annotation (GTF) file', ifunreadable=>'annotation not specified'},
+parse_command_line(annot    => {description=>'the annotation (GTF) file'},
+		   exons    => {description=>'exons file with exons to quantify'},
                    ssj      => {description=>'the input ssj (BED) file', ifunreadable=>'input not specified'},
                    ssc      => {description=>'the input ssc (BED) file'},
 		   mincount => {default=>10,  description=>'the min value of the denominator of the fraction'},
@@ -43,28 +44,49 @@ print STDERR ", n=$n]\n";
 # lb is an array which appoints to each exon boundary l |-> list of exons whose left boundary is l
 # rb ... r |-> list of exons whose right boundary is r
 
-print STDERR "[<$annot";
-open FILE, $annot || die();
-while($line=<FILE>) {
-    chomp $line;
-    ($chr, $source, $feature, $beg, $end, $score, $s) = split /\t/, $line;
-    if($feature eq "exon") {
-    	$e = join("_", $chr, $beg, $end, $s);
-    	$str = strand_c2i($s) * $stranded;
-    	$l = $index{$chr}{$str}{$beg};
-    	$r = $index{$chr}{$str}{$end};
-    	push @{$lb[$l]}, $e;
-    	push @{$rb[$r]}, $e;
+if(-r $annot) {
+    print STDERR "[<$annot";
+    open FILE, $annot;
+    while($line=<FILE>) {
+    	chomp $line;
+    	($chr, $source, $feature, $beg, $end, $score, $s) = split /\t/, $line;
+    	if($feature eq "exon") {
+    	    $e = join("_", $chr, $beg, $end, $s);
+	    next if($been{$e}++);
+    	    $str = strand_c2i($s) * $stranded;
+    	    $l = $index{$chr}{$str}{$beg};
+    	    $r = $index{$chr}{$str}{$end};
+    	    push @{$lb[$l]}, $e;
+    	    push @{$rb[$r]}, $e;
+    	}
+#       if($feature eq "intron") {
+#            ($beg, $end) = reverse ($beg, $end) if($str<0);
+#            $count53{$chr}{$str}{$beg}{$end}=0;
+#            $count5X{$chr}{$str}{$beg}=0;
+#            $countX3{$chr}{$str}{$end}=0;
+#	}
     }
-    if($feature eq "intron") {
-        ($beg, $end) = reverse ($beg, $end) if($str<0);
-        $count53{$chr}{$str}{$beg}{$end}=0;
-        $count5X{$chr}{$str}{$beg}=0;
-        $countX3{$chr}{$str}{$end}=0;
-    }
+    close FILE;
+    print STDERR "] ", 0+keys(%been), "\n";
 }
-close FILE;
-print STDERR "]\n";
+
+if(-r $exons) {
+    print STDERR "[<$exons";
+    open FILE, $exons || die();
+    while($line=<FILE>) {
+    	chomp $line;
+    	($e) = split /\t/, $line;
+	($chr, $beg, $end, $s) = split /\_/, $e;
+	next if($been{$e}++);
+	$str = strand_c2i($s) * $stranded;
+	$l = $index{$chr}{$str}{$beg};
+	$r = $index{$chr}{$str}{$end};
+	push @{$lb[$l]}, $e;
+	push @{$rb[$r]}, $e;
+    }
+    close FILE;
+    print STDERR "] ", 0+keys(%been), "\n";
+}
 
 #######################################################################################################################
 

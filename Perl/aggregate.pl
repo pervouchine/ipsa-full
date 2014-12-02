@@ -22,10 +22,10 @@ while($line=<STDIN>) {
         ($chr, $beg, $end, $str) = split /\_/, $id;
          next if($minintron  && ($end - $beg - 2 < $minintron) || $maxintron && ($end - $beg - 2 > $maxintron));
     }
-    $chr ="chr$chr" unless($chr=~/^chr/);
+    $id ="chr$id" unless($id=~/^chr/);
+    $stat[$offset]+=$count;
     next if($readLength && $margin && ($offset < $margin || $offset >= $readLength - $margin));
     push @{$data{$id}}, $count;
-    $stat[$offset]+=$count;
 }
 
 foreach $id(sort keys(%data)) {
@@ -36,7 +36,7 @@ foreach $id(sort keys(%data)) {
 if($logfile) {
     open FILE, ">$logfile";
     for($offset=0;$offset<$readLength;$offset++) {
-	print FILE join("\t", $logfile, $offset, $stat[$offset]), "\n";
+	print FILE join("\t", $logfile, $offset, 0+$stat[$offset]), "\n";
     }
     close FILE;
 }

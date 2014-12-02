@@ -17,7 +17,7 @@ die unless(keys(%input)>0);
 
 foreach $file(keys(%input)) {
     $name = $input{$file};
-    print STDERR "[",++$N,":$file $name";
+    print STDERR "[",++$N," $file $name";
     open FILE, $file;
     while($line = <FILE>) {
 	@array = split /\t/, $line;
