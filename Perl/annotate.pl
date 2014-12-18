@@ -18,8 +18,9 @@ parse_command_line(	in	=> {description=>'the input tsv file', ifunreadable=>'inp
 
 read_annotation($annot);
 
-$program = $MAPTOOLSDIR."bin/getsegm -limit 4 -margins -1 0 -spacer 0 -inp_type 2 -out_type 1";
-%seq = split /[\t\n]/, `$program -dbx $dbx -idx $idx -in $in`;
+$program = $MAPTOOLSDIR."bin/getsegm2 -limit 4 -margins -1 0 -spacer 0 -inp_type 2 -out_type 1";
+%seq = split /[\t\n]/, `cat $in | $program -dbx $dbx -idx $idx`;
+print STDERR "[cat $in | $program -dbx $dbx -idx $idx]\n";
 
 open FILE, $in || die;
 while($line=<FILE>) {
@@ -28,7 +29,7 @@ while($line=<FILE>) {
     ($chr, $beg, $end, $strand) = split /\_/, $id;
     foreach $str("+", "-") {
 	if($strand eq $str || $strand eq '.') {	
-	    $status = annot_status($chr,$beg,$end,$str);
+	    $status = annot_status($chr, $beg, $end, $str);
 	    $id = join("_", $chr, $beg, $end, $str);
 	    $nucl   = $seq{$id};
 	    $nucl   = "NA" unless($nucl);
