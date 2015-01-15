@@ -7,7 +7,7 @@ if(@ARGV==0) {
 
 parse_command_line(annot=>{description=>'the genomic annotation', ifunreadable=>'the genomic annotation is missing'},
 		   quant=>{description=>'the transcript quantification file (gtf/gff)', ifunreadable=>'the quantification file missing'},
-		   minc =>{description=>'the minimum sum of rpkms to consider the inclusion ratio as reliable', default=>0});
+		   minc =>{description=>'the minimum sum of rpkms to consider the inclusion ratio as reliable', default=>0.5});
 		
 #######################################################################################################################
 
@@ -70,7 +70,7 @@ foreach $chr(keys(%exon)) {
 	for($i=0; $i<@{$loe{$chr}{$str}}; $i++) {
 	    $eid = join("_", $chr, @{$loe{$chr}{$str}->[$i]}, $str);
 	    $psi  = frac($inc{$eid}, $tot{$eid} - $inc{$eid});
-	    print join("\t", $chr, 'TXPIPE', 'exon', @{$loe{$chr}{$str}->[$i]}, int(1000*$psi), $str, '.', set_attributes(psi=>$psi, inc=>$inc{$eid}, tot=>$tot{$eid})), "\n";
+	    print join("\t", $chr, 'TXPIPE', 'exon', @{$loe{$chr}{$str}->[$i]}, int(1000*$psi), $str, '.', set_attributes(psitx=>$psi, inc=>$inc{$eid}, tot=>$tot{$eid})), "\n";
 	}	
     }
 }

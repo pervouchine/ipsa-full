@@ -67,6 +67,9 @@ while($line=<STDIN>) {
 	make(script=>"choose_strand.pl", input=>{'<'=>fn($name,A03,ssj,tsv)}, output=>{'>'=>fn($name,A04,ssj,tsv), -logfile=>fn($name,A04,ssj,'log')}, before=>"-", endpoint=>A04);
 	make(script=>"constrain_ssc.pl", input=>{'<'=>fn($name,A02,ssc,tsv),-ssj=>fn($name,A04,ssj,tsv)}, output=>{'>'=>fn($name,A04,ssc,tsv)}, endpoint=>A04);	
 
+	make(script=>"awk", before=>"'\$\$4>=$entropy && \$\$5>=$status'", input=>{''=>fn($name,A04,ssj,tsv)}, output=>{'>'=>fn($name,F04,ssj,tsv)}, endpoint=>F04);
+	$merge_tsv{F}{fsj}{fn($name,F04,ssj,tsv)} = $smp;
+
         make(script=>"awk '\$\$2>=2'", input=>{''=>fn($name,A01,ssj,tsv)}, output=>{'>'=>fn($name,D01,tsv)}, between=>"| perl Perl/agg.pl -", endpoint=>D01);
 	make(script=>"constrain_mult.pl", input=>{-ssj=>fn($name,A04,ssj,tsv), '<'=>fn($name,D01,tsv)}, output=>{'>'=>fn($name,D02,tsv)}, endpoint=>D02);
 	make(script=>"extract_mex.pl", input=>{'<'=>fn($name,D02,tsv)}, output=>{'>'=>fn($name,D03,tsv)}, endpoint=>D03);
@@ -84,7 +87,7 @@ while($line=<STDIN>) {
 	$merge_gff{A}{'psi,cosi'}{fn($grp,A07,gff)} = $grp;
 	$merge_gff{A}{'psi5,psi3'}{fn($grp,A07,gff)} = $grp;
 	$merge_gff{A}{'cosi5,cosi3'}{fn($grp,A07,gff)} = $grp;
-	$merge_gff{D}{'mpsi,mcosi'}{fn($grp,D07,gff)} = $grp;
+	#$merge_gff{D}{'mpsi,mcosi'}{fn($grp,D07,gff)} = $grp;
 	$merge_gff{B}{'psicas'}{fn($grp,B07,gff)} = $grp;
     }
 

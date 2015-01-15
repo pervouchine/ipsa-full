@@ -52,6 +52,8 @@ foreach $key(sort keys(%output)) {
             push @arr, $value =~/\d/ ? $value : "NA";
             $num++ if($value =~/\d/);
         }
+	print STDERR $num, " ", $percent*@c, "\n";
+	exit;
         print FILE join("\t", @arr), "\n" if($num>$percent*@c);
     }
     close FILE;
