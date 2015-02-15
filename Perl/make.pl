@@ -37,13 +37,14 @@ while($line=<STDIN>) {
 
     if($attr{'type'} eq "bam" && $attr{'view'}=~/^Alignments/) {
 
-	if($attr{'readType'}=~/\dx(\d+)(D*)/) {
+	if($attr{'readType'}=~/(\d+)(D*)$/) {
 	    $readLength = $1;
 	    $stranded   = ($2 eq "D" ? "" : "-unstranded");
 	}
 	else {
 	    die("Read length not specified");
 	}
+	die("Incorrect read length") unless($readLength>0);
 
         @a = split /\//, $file;
         $target = pop(@a);
@@ -87,7 +88,7 @@ while($line=<STDIN>) {
 	$merge_gff{A}{'psi,cosi'}{fn($grp,A07,gff)} = $grp;
 	$merge_gff{A}{'psi5,psi3'}{fn($grp,A07,gff)} = $grp;
 	$merge_gff{A}{'cosi5,cosi3'}{fn($grp,A07,gff)} = $grp;
-	#$merge_gff{D}{'mpsi,mcosi'}{fn($grp,D07,gff)} = $grp;
+	$merge_gff{D}{'psi,cosi'}{fn($grp,D07,gff)} = $grp;
 	$merge_gff{B}{'psicas'}{fn($grp,B07,gff)} = $grp;
     }
 
@@ -134,7 +135,7 @@ foreach $endpoint(keys(%merge_gff)) {
     foreach $arms(keys(%{$merge_gff{$endpoint}})) {
 	%outputs=();
 	foreach $arm(split /\,/, $arms) {
-	    $outputs{$arm} = fn($merge,$arm,tsv);
+	    $outputs{$arm} = fn($merge,$endpoint,$arm,tsv);
 	}
         make2(script=>"merge_gff.pl", inputs=>{-i=>\%{$merge_gff{$endpoint}{$arms}}}, outputs=>{-o=>\%outputs}, endpoint=>$endpoint);
     }
