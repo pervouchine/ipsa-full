@@ -1,6 +1,8 @@
 #!/usr/bin/perl
 use POSIX;
 $WCHAR = 180;
+@SITE_MATRIX = ([0,.5,1],[.5,1.25,1.5],[1,1.5,2]);
+
 
 return(1);
 
@@ -272,6 +274,27 @@ sub aggstat {
     return($s, $c, $h>0 ? $h : 0);
 }
 
+#####################################################################################################################################
+
+sub read_junctions {
+    my $N=0;
+    print STDERR "[<@_[0]";
+    open FILE, @_[0] || die ('Cannot read junctions');
+        while($line=<FILE>) {
+        chomp $line;
+        ($chr, $beg, $end, $strand) = split /[\_\t]/, $line;
+	foreach $str("+", "-") {
+            if($strand eq $str || $strand eq '.') {
+        	$SS{"b;$chr;$str"}{$beg} = f;
+        	$SS{"e;$chr;$str"}{$end} = f;
+	    }
+	}
+        $N++;
+    }
+    close FILE;
+    print STDERR ", $N junctions]\n";
+}
+
 sub read_annotation {
     my $N=0;
     print STDERR "[<@_[0]";
@@ -281,8 +304,8 @@ sub read_annotation {
     	($chr, $source, $feature, $beg, $end, $score, $str, $frame, $group) = split /\t/, $line;
     	if($feature eq "intron") {
     	    $SJ{$chr}{$beg}{$end}{$str}++;
-    	    $SS{$chr}{$beg}{$str}++;
-    	    $SS{$chr}{$end}{$str}++;
+	    $SS{"b;$chr;$str"}{$beg} = t;
+	    $SS{"e;$chr;$str"}{$end} = t;
 	}
 	$N++;
     }
@@ -291,7 +314,38 @@ sub read_annotation {
 }
 
 
+sub index_ss {
+    foreach $key(keys(%SS)) {
+	@arr = sort {$a<=>$b} keys(%{$SS{$key}});
+	$SS_next{$key}{0} = $arr[1];
+	for($i=1;$i<@arr-1;$i++) {
+	    $SS_next{$key}{$arr[$i]} = $arr[$i+1];
+	    $SS_prev{$key}{$arr[$i]} = $arr[$i-1];
+	}
+	$SS_prev{$key}{$arr[-1]} = $arr[-2];
+    }
+}
+
+#####################################################################################################################################
+
+sub call_site {
+    my ($type, $chr, $pos, $str) = @_;
+    my $key = "$type;$chr;$str";
+    my %res = ();
+    $DELTA = 10;
+    for(my $x = $pos; abs($x-$pos)<$DELTA; $x = $SS_next{$key}{$x}) {
+    	last unless($x);
+    	$res{$x} = abs($x-$pos) if($SS{$key}{$x} eq t);
+    }
+    for(my $x = $pos; abs($x-$pos)<$DELTA; $x = $SS_prev{$key}{$x}) {
+    	last unless($x);
+    	$res{$x} = abs($x-$pos) if($SS{$key}{$x} eq t);
+    }
+    my @out = sort {$res{$a} <=> $res{$b}} keys(%res);
+    return($SS{$key}{$pos} eq t ? 2 : ($out[0] ? 1 : 0));
+}
+
 sub annot_status {
     my ($chr, $beg, $end, $str) = @_;
-    return($SJ{$chr}{$beg}{$end}{$str} ? 3 : ($SS{$chr}{$beg}{$str} && $SS{$chr}{$end}{$str} ? 2 : ($SS{$chr}{$beg}{$str} || $SS{$chr}{$end}{$str} ? 1 : 0)));
+    return($SJ{$chr}{$beg}{$end}{$str} ? 3 : $SITE_MATRIX[call_site(b, $chr, $beg, $str)][call_site(e, $chr, $end, $str)]);
 }

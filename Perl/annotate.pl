@@ -15,8 +15,9 @@ parse_command_line(	in	=> {description=>'the input tsv file', ifunreadable=>'inp
 			MAPTOOLSDIR  =>{variable=>T, ifabsent=>'MAPTOOLSDIR not specified'});
 
 
-
+read_junctions($in);
 read_annotation($annot);
+index_ss();
 
 $program = $MAPTOOLSDIR."bin/getsegm2 -limit 4 -margins -1 0 -spacer 0 -inp_type 2 -out_type 1";
 %seq = split /[\t\n]/, `cat $in | $program -dbx $dbx -idx $idx`;
