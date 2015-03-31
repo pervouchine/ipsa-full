@@ -10,9 +10,6 @@ parse_command_line(i => {description=>'input gtf file name and label', array=>ha
 
 die unless(keys(%input)>0);
 
-@annot = (0,1,2,3);
-#@annot = (0,0.5,1,1.25,1.5,2,3);
-
 foreach $file(keys(%input)) {
     $name = $input{$file};
     print STDERR "[$file $name";
@@ -21,7 +18,7 @@ foreach $file(keys(%input)) {
 	($id, $count, $stag, $entropy, $annot, $nucl) = split /\t/, $line;
 	$log2count = int(log($count)/log(2));
 	for($i=0; $i<=$log2count; $i++) {
-	    $data{int($annot)}{$id}{$i}++;
+	    $data{$annot}{$id}{$i}++;
 	}
 	$maxlog2count = $log2count if($maxlog2count < $log2count);
     }
@@ -64,7 +61,7 @@ foreach $annot(keys(%freq)) {
     }
 }
 
-for($annot=0; $annot<=3; $annot++) {
+foreach $annot(sort {$a<=>$b} keys(%data)) {
     for($log2count=0; $log2count<=$maxlog2count; $log2count++) {
 	for($nsp=1; $nsp<=$n; $nsp++) {
 	    $s=$res{$annot}{$log2count}{$nsp}+0;
