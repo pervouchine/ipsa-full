@@ -14,6 +14,7 @@ parse_command_line(     dir     => {description=>'the output directory', ifabsen
 			smpid	=> {description=>'sample id field', default=>'labExpId'},
 			margin  => {description=>'margin for aggregate', default=>5},
 			entropy => {description=>'entropy lower threshold', default=>1.5},
+			deltaSS => {description=>'distance threshold for splice sites', default=>0},
 			status  => {description=>'annotation status lower threshold', default=>0},
 			mincount=> {description=>'min number of counts for the denominator', default=>10},
 			idr     => {description=>'IDR upper threshold', default=>0.1},
@@ -67,7 +68,7 @@ while($line=<STDIN>) {
 
 	make(script=>"offset.r", input=>{-t=>fn($name,A02,ssj,'log')}, output=>{-p=>fn($name,A02,ssj,'pdf')}, endpoint=>QC1);
 
-	make(script=>"annotate.pl",      input=>{-in=>fn($name,A02,ssj,tsv), -annot=>$annot, -dbx=>"$genome.dbx", -idx=>"$genome.idx"}, output=>{'>'=>fn($name,A03,ssj,tsv)}, endpoint=>A03);
+	make(script=>"annotate.pl", input=>{-in=>fn($name,A02,ssj,tsv), -annot=>$annot, -dbx=>"$genome.dbx", -idx=>"$genome.idx"}, output=>{'>'=>fn($name,A03,ssj,tsv)}, after=>"-deltaSS $deltaSS", endpoint=>A03);
 	make(script=>"choose_strand.pl", input=>{'<'=>fn($name,A03,ssj,tsv)}, output=>{'>'=>fn($name,A04,ssj,tsv), -logfile=>fn($name,A04,ssj,'log')}, before=>"-", endpoint=>A04);
 	make(script=>"constrain_ssc.pl", input=>{'<'=>fn($name,A02,ssc,tsv),-ssj=>fn($name,A04,ssj,tsv)}, output=>{'>'=>fn($name,A04,ssc,tsv)}, endpoint=>A04);	
 

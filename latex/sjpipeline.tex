@@ -71,6 +71,7 @@ will be executed in order to to run the pipeline.
 Perl/make.pl -dir <dirname> -param <params> -by <attribute> -margin 
           <length> -annot <gtf> -genome <name> -merge <name>
 Inputs: -annot ..., the annotation (gtf), obligatory
+	-deltaSS ..., distance threshold for splice sites, default=0
 	-block ..., the blocking field for mastertable
 	-dir ..., the output directory, obligatory
 	-entropy ..., entropy lower threshold, default=1.5
@@ -252,18 +253,44 @@ Input:  -in TSV file (the output of aggregate.pl)
         -annot ..., the annotation (gtf), obligatory
         -dbx ..., the genome (dbx), obligatory
         -idx ..., the genome (idx), obligatory
+	-deltaSS ..., distance threshold for splice sites, default=0
 Outout: TSV on STDOUT
 \end{verbatim}
 The annotation file is a simplified, processed form of the standard annotation gtf. It can be obtained by the \prog{transcript\_elements.pl} utility (see section~\ref{sec::preprocessing}).
 The genome consists of two compressed files, *.dbx and *.idx, which can be obtained from the genomic fasta sequence by using \prog{transf} utility of the \prog{maptools} package. 
 
-The annotation status is defined numerically as follows:
+In previous versions the annotation status was defined numerically as follows:
 \begin{enumerate}
 \item[(0)] None of the splice sites of the given SJ is annotated;
 \item[(1)] One of the splice sites of the given SJ is annotated, and the other is not;
 \item[(2)] Both splice sites of the given SJ are annotated but the intron between them is not;
 \item[(3)] Both splice sites of the given SJ are annotated, and so is the intron between them.
 \end{enumerate}
+
+In the current version the annotation status is defined for each splice site as
+\begin{enumerate}
+\item[(0)] not within {\tt deltaSS} nucleotides from an annotated SS;
+\item[(1)] within {\tt deltaSS} nucleotides from an annotated SS;
+\item[(2)] annotated.
+\end{enumerate}
+
+The status of a splice junction is defined according to the table (rows -- donor site; columns -- acceptor site)\\
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline
+ 	& 0 & 1 & 2\\
+\hline
+ 	& not annot & within deltaSS & annotated\\
+\hline
+0	&0 	&0.5 	& 1\\
+\hline
+1	&0.5 	&0.75 	& 1.5\\
+\hline
+2	&1	&1.5	&2 or 3\\
+\hline
+\end{tabular}
+\end{center}
+
 
 The splice site nucleotides are the four intronic nucleotides, two flanking ones from each end, such as GTAG or ATAC. Since for this field and for the annotation status strand 
 has to be defined, two lines are produced in the case of unstranded data (one for each strand). For instance, if the input were
