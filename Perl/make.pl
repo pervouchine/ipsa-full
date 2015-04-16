@@ -14,7 +14,7 @@ parse_command_line(     dir     => {description=>'the output directory', ifabsen
 			smpid	=> {description=>'sample id field', default=>'labExpId'},
 			margin  => {description=>'margin for aggregate', default=>5},
 			entropy => {description=>'entropy lower threshold', default=>1.5},
-			deltaSS => {description=>'distance threshold for splice sites', default=>0},
+			deltaSS => {description=>'distance threshold for splice sites', default=>10},
 			status  => {description=>'annotation status lower threshold', default=>0},
 			mincount=> {description=>'min number of counts for the denominator', default=>10},
 			idr     => {description=>'IDR upper threshold', default=>0.1},

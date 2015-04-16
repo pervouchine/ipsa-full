@@ -129,7 +129,7 @@ sub makedir {
 }
 
 sub make {
-    my %param = (@_, %PARAMS);
+    my %param = @_;
     my %input  = %{$param{'input'}};
     my %output = %{$param{'output'}}; 
     push @{$param{'depend'}}, " $param{'script'}" if($param{'script_required'});
@@ -137,7 +137,7 @@ sub make {
     $param{'script'} = "Rscript R/$param{'script'}" if($param{'script'}=~/\.r$/);
     print join(" ", values(%output))," : ",join(" ", values(%input), @{$param{'depend'}}), "\n";
     makedir(values(%output));
-    print "\ttouch ", join(" ", values(%output)),"\n" if($param{'touch'});
+    print "\ttouch ", join(" ", values(%output)),"\n"; #if($param{'touch'});
     print "\t$param{'script'} ",join(" ", $param{'before'}, %input, $param{'between'}, %output, $param{'after'})," \n";
     print "$param{'endpoint'} :: ", join(" ", values(%output)), "\n" if($param{'endpoint'});
     print "rm-$param{'endpoint'} ::\n\t rm -f ", join(" ", values(%output)), "\n" if($param{'endpoint'});
