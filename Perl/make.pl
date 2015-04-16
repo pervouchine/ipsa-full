@@ -58,6 +58,8 @@ while($line=<STDIN>) {
         $target  =~ s/\.bam$//;
         $name = "$target";
 
+	$PARAMS{'touch'}=>T;
+
 	make(script=>$SJCOUNTDIR."sjcount", input=>{-bam=>$file}, output=>{-ssj=>fn($name,A01,ssj,tsv), -ssc=>fn($name,A01,ssc,tsv), -log=>fn($name,A01,ssj,'log')},
              after=>"-nbins $readLength $param $stranded -quiet", mkdir=>T, endpoint=>A01);
 

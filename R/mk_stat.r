@@ -15,7 +15,7 @@ print(subset(data, log2count==0 & nsp==1))
 
 data = subset(data, (nsp-1) %% opt$fct == 0)
 
-data$ann = factor(data$ann, levels=c(0,1,2,3), labels=c('Both unknown','One known','Both known','Intron known'))
+#data$ann = factor(data$ann, levels=c(0,1,2,3), labels=c('Both unknown','One known','Both known','Intron known'))
 
 pdf(opt$pdf, width=4, height=4)
 the_base_size = 10

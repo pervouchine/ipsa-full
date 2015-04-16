@@ -129,7 +129,7 @@ sub makedir {
 }
 
 sub make {
-    my %param = @_;
+    my %param = (@_, %PARAMS);
     my %input  = %{$param{'input'}};
     my %output = %{$param{'output'}}; 
     push @{$param{'depend'}}, " $param{'script'}" if($param{'script_required'});
