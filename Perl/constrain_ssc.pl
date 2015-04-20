@@ -20,7 +20,7 @@ while($line=<STDIN>) {
     ($id, $rest) = split /\t/, $line, 2;
     ($chr, $pos, $strand) = split /\_/, $id;
     foreach $str("+", "-") {
-        print $line if(($strand eq $str || $strand eq '.') && $data{$chr}{$pos}{$str});
+        print join("_", $chr, $pos, $str), "\t", $rest if(($strand eq $str || $strand eq '.') && $data{$chr}{$pos}{$str});
     }
 }
 
