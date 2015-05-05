@@ -7,9 +7,12 @@ if(@ARGV==0) {
 
 parse_command_line(annot=>{description=>'the genomic annotation', ifunreadable=>'the genomic annotation is missing'},
 		   quant=>{description=>'the transcript quantification file (gtf/gff)', ifunreadable=>'the quantification file missing'},
+		   field=>{description=>'comma separated list of fields to be averaged', default=>"RPKM"},
 		   minc =>{description=>'the minimum sum of rpkms to consider the inclusion ratio as reliable', default=>0.5});
 		
 #######################################################################################################################
+
+@field = split /\,/, $field;
 
 print STDERR "[<$annot";
 open FILE, $annot || die();
@@ -44,11 +47,12 @@ open FILE, "sort -k1,1 -k4,4n $quant |" || die();
 while($line=<FILE>) {
     chomp $line;
     ($chr, $source, $element, $beg, $end, $name, $str, $trash, $attr) = split /\t/, $line;
+    next unless($element eq "transcript");
     #$chr = "chr$chr" unless($chr=~/^chr/);
     %attr = get_attributes($attr);
 
     $tid = $attr{'transcript_id'};
-    $abundance = $attr{'RPKM'} ? $attr{'RPKM'} : 0.5*($attr{'RPKM1'} + $attr{'RPKM2'});
+    $abundance = avg(@attr{@field});
 
     while($curr{$chr}{$str} < @{$loe{$chr}{$str}} && $loe{$chr}{$str}->[$curr{$chr}{$str}]->[0]<$beg) {$curr{$chr}{$str}++;}
     for($i=$curr{$chr}{$str}; $i<@{$loe{$chr}{$str}} && $loe{$chr}{$str}->[$i]->[0]<=$end; $i++) {

@@ -7,26 +7,28 @@ if(@ARGV==0) {
     print STDERR "This utility creates a makefile for the sj pipeline, taking the index file from STDIN and printing the makefile to STDOUT\n";
 }
 
-parse_command_line(     dir     => {description=>'the output directory', ifabsent=>'output directory not specified'},
-			repository => {description=>'the repository subdirectory for bam files'},
-			param   => {description=>'parameters passed to sjcount'},
-			group	=> {description=>'the grouping field for IDR', default=>'labExpId'},
-			smpid	=> {description=>'sample id field', default=>'labExpId'},
-			margin  => {description=>'margin for aggregate', default=>5},
-			entropy => {description=>'entropy lower threshold', default=>1.5},
-			deltaSS => {description=>'distance threshold for splice sites', default=>10},
-			status  => {description=>'annotation status lower threshold', default=>0},
-			mincount=> {description=>'min number of counts for the denominator', default=>10},
-			idr     => {description=>'IDR upper threshold', default=>0.1},
+parse_command_line(     in      => {description=>'the index file', ifabsent=>'index file not specified'},
+                        dir     => {description=>'the output directory', ifabsent=>'output directory not specified'},
+                        repository => {description=>'the repository subdirectory for bam files'},
+                        param   => {description=>'parameters passed to sjcount'},
+                        group   => {description=>'the grouping field for IDR', default=>'labExpId'},
+                        smpid   => {description=>'sample id field', default=>'labExpId'},
+                        margin  => {description=>'margin for aggregate', default=>5},
+                        entropy => {description=>'entropy lower threshold', default=>1.5},
+                        deltaSS => {description=>'distance threshold for splice sites', default=>10},
+                        status  => {description=>'annotation status lower threshold', default=>0},
+                        mincount=> {description=>'min number of counts for the denominator', default=>10},
+                        idr     => {description=>'IDR upper threshold', default=>0.1},
                         annot   => {description=>'the annotation (gtf)', ifabsent=>'annotation not specified'},
-			genome	=> {description=>'the genome (without .dbx or .idx)', ifabsent=>'genome not specified'},
-			merge	=> {description=>'the name of the output to merge in case if blocks are missing', default=>"all"},
-			SJCOUNTDIR =>{variable=>T,ifabsent=>'SJCOUNTDIR not specified'});
+                        genome  => {description=>'the genome (without .dbx or .idx)', ifabsent=>'genome not specified'},
+                        merge   => {description=>'the name of the output to merge in case if blocks are missing', default=>"all"},
+                        SJCOUNTDIR =>{variable=>T,ifabsent=>'SJCOUNTDIR not specified'});
 
 @group = split /\,/, $group;
 @smpid = split /\,/, $smpid;
 
-while($line=<STDIN>) {
+open FILE, $in || die("Can't read $in exiting\n");
+while($line=<FILE>) {
     chomp $line;
     ($file, $attr) = split /\t/, $line;
     %attr = get_features($attr);
@@ -103,6 +105,7 @@ while($line=<STDIN>) {
 	$merge_gff{C}{psitx}{fn($grp,C07,gff)} = $grp;
     }
 }
+close FILE;
 
 foreach $grp(keys(%IDR)) {
     make(script=>"idr4sj.pl", input=>{''=>join(" ", @{$IDR{$grp}{ssj}})}, output=>{'>'=>fn($grp,A05,ssj,tsv)}, endpoint=>A05);
@@ -153,7 +156,4 @@ print "all :: A D stats\n";
 
 sub fn {
     return(@_[1]=~/^[A-Z]\d+$/ ? join(undef, $dir, @_[1], "/", join('.', @_)) : join(undef, $dir, join('.', @_)));
-    
 }
-
-

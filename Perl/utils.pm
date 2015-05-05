@@ -180,6 +180,7 @@ sub make2 {
     }
 }
 
+
 ################################################################################################################################################
 # returns formatted fraction (inclusion)/(inclusion + exclusion) if the denomintor > mincount; NA otherwise
 sub frac {

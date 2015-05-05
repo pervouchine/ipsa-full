@@ -24,7 +24,6 @@ foreach $file(keys(%input)) {
     open FILE, $file;
     while($line = <FILE>) {
 	($chr, $source, $feature, $beg, $end, $score, $str, $frame, $attr) = split /\t/, $line;
-        #$chr = "chr$chr" unless($chr=~/^chr/);
         $id = "$chr\_$beg\_$end\_$str";
 	%attr = get_attributes($attr);
 	foreach $key(keys(%output)) {
