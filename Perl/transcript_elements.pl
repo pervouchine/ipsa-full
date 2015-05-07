@@ -20,7 +20,6 @@ print STDERR "[<stdin";
 while($line=<STDIN>) {
     chomp $line;
     ($chr, $src, $element, $beg, $end, $trash, $str, $trash, $attr) = split /\t/, $line;
-    #$chr = "chr$chr" unless($chr=~/^chr/);
     %attr =  get_attributes($attr);
     $tid = $attr{'transcript_id'};
     $CHR{$tid}{$chr} = $STR{$tid}{$str} = 1;

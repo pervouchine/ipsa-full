@@ -22,7 +22,6 @@ while($line=<FILE>) {
     chomp $line;
     ($id, $count) = split /\t/, $line;
     ($chr, $beg, $end, $s) = split /\_/, $id;
-    #$chr = "chr$chr" unless($chr=~/^chr/);
     $str = strand_c2i($s) * $stranded;
     $site{$chr}{$str}{$beg} = 1;
     $site{$chr}{$str}{$end} = 1;
@@ -97,7 +96,6 @@ while($line=<FILE>) {
     chomp $line;
     ($id, $count) = split /\t/, $line;
     ($chr, $beg, $end, $s) = split /\_/, $id;
-    #$chr = "chr$chr" unless($chr=~/^chr/);
     $str = strand_c2i($s) * $stranded;
     $start = $index{$chr}{$str}{$beg}; 		# index of the left side of SJ
     $stop  = $index{$chr}{$str}{$end}; 		# index of the right side of SJ

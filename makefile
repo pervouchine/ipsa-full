@@ -27,7 +27,7 @@ clean ::
 all :: example.mk
 	# Installation complete. Type 'make run' to execute a test run.
 
-run ::	example.mk ${DIR}hg19.idx ${DIR}hg19.dbx ${DIR}hg19v18.gff
+run ::	example.mk ${DIR}hg19.idx ${DIR}hg19.dbx ${DIR}hg19v18.gfx
 	make -f example.mk all 
 	# Test run complete. The output is in the output/ directory.
 	ls -l ${DIR}output/
@@ -49,14 +49,14 @@ ${DIR}hg19.idx ${DIR}hg19.dbx : ${DIR}chr22Y/chr22.fa
 	mkdir -p ${DIR}
 	${MAPTOOLSDIR}bin/transf -dir ${DIR}chr22Y/chr22.fa -idx ${DIR}hg19.idx -dbx ${DIR}hg19.dbx
 
-${DIR}hg19v18.gff : ${DIR}gencode.v18.annotation.gtf
-	perl Perl/transcript_elements.pl - < ${DIR}gencode.v18.annotation.gtf > ${DIR}hg19v18.gff
+${DIR}hg19v18.gfx : ${DIR}gencode.v18.annotation.gtf
+	perl Perl/transcript_elements.pl - < ${DIR}gencode.v18.annotation.gtf > ${DIR}hg19v18.gfx
 
 example.dat : 
 	wget http://genome.crg.eu/~dmitri/export/ipsa/example_ipsa.dat -O example.dat
 
 example.mk : example.dat Perl/make.pl
-	perl Perl/make.pl -repository ${DIR}input/ -dir ${DIR}output/ -group idrGroup -param '-read1 0' -annot ${DIR}hg19v18.gff -genome ${DIR}hg19 -merge pooled -in  example.dat > example.mk
+	perl Perl/make.pl -repository ${DIR}input/ -dir ${DIR}output/ -group idrGroup -param '-read1 0' -annot ${DIR}hg19v18.gfx -genome ${DIR}hg19 -merge pooled -in  example.dat > example.mk
 
 ###############################################################################################
 

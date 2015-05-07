@@ -10,7 +10,8 @@ parse_command_line(margin	=>{default=>0, 	description=>'the margin for offset'},
 		   readLength	=>{default=>0, 	description=>'the read length'},
 		   logfile	=>{description=>'name of the log file'},
 		   minintron    =>{default=>4,  description=>'min intron length; only applied to splits of degree 1'},
-                   maxintron    =>{default=>0,  description=>'max intron length; only applied to splits of degree 1'}
+                   maxintron    =>{default=>0,  description=>'max intron length; only applied to splits of degree 1'},
+		   prefix	=>{description=>'prefix in the chromosome name', default=>""}
 		  );
 
 while($line=<STDIN>) {
@@ -20,7 +21,7 @@ while($line=<STDIN>) {
         ($chr, $beg, $end, $str) = split /\_/, $id;
          next if($minintron  && ($end - $beg - 2 < $minintron) || $maxintron && ($end - $beg - 2 > $maxintron));
     }
-    $id ="chr$id" unless($id=~/^chr/);
+    $id ="$prefix$id";
     $stat[$offset]+=$count;
     next if($readLength && $margin && ($offset < $margin || $offset >= $readLength - $margin));
     push @{$data{$id}}, $count;

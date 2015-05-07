@@ -18,7 +18,6 @@ open FILE, $ssj || die("Can't open $ssj\n");
 while($line=<FILE>) {
     chomp $line;
     ($chr, $beg, $end, $s, $count) = split /\t/, $line;
-    #$chr = "chr$chr" unless($chr=~/^chr/);
     $str = strand_c2i($s) * $stranded;
     ($beg, $end) = reverse ($beg, $end) if($str<0);
     $count53{$chr}{$str}{$beg}{$end}+=$count;

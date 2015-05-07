@@ -20,7 +20,6 @@ while($line=<FILE>) {
     chomp $line;
     ($chr, $trash, $element, $beg, $end, $trash, $str, $frame, $attr) = split /\t/, $line;
     next unless($element eq "exon");
-    #$chr = "chr$chr" unless($chr=~/^chr/);
     $eid = join("_", $chr, $beg, $end, $str);
     %attr = get_attributes($attr);
     foreach $tid(split /\,/, $attr{'transcript_id'}) {
@@ -48,7 +47,6 @@ while($line=<FILE>) {
     chomp $line;
     ($chr, $source, $element, $beg, $end, $name, $str, $trash, $attr) = split /\t/, $line;
     next unless($element eq "transcript");
-    #$chr = "chr$chr" unless($chr=~/^chr/);
     %attr = get_attributes($attr);
 
     $tid = $attr{'transcript_id'};

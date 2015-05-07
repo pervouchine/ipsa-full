@@ -21,7 +21,6 @@ while($line=<FILE>) {
     chomp $line;
     ($chr, $source, $feature, $beg, $end, $score, $str, $frame, $attr) = split /\t/, $line;
     next unless($feature eq "exon");
-    $chr = "chr$chr" unless($chr=~/^chr/);
     $str = strand_c2i($str);
     ($beg, $end) = reverse ($beg, $end) if($str<0);
     %attr = get_attributes($attr);

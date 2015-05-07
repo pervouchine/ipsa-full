@@ -22,7 +22,6 @@ foreach $file(keys(%input)) {
     while($line = <FILE>) {
 	@array = split /\t/, $line;
 	unshift(@array, undef);
-        #$chr = "chr$chr" unless($chr=~/^chr/);
         $id = join($sep, @array[@key]);
 	$data{$name}{$id} += $array[$val];
 	$rows{$id}++;
