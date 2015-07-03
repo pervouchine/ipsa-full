@@ -26,7 +26,7 @@ print STDERR "[<$ssj";
 open FILE, $ssj || die();
 while($line=<FILE>) {
     chomp $line;
-    ($chr, $beg, $end, $str, $count) = split /\t/, $line;
+    ($chr, $beg, $end, $str, $count) = split /[\t\_]/, $line;
     $data{$chr}{$str}{$beg}{$end} = $count;
 }
 close FILE;
@@ -39,10 +39,11 @@ foreach $chr(sort keys(%{$elem{exon}})) {
 		$a = (sort {$a<=>$b} keys(%{$mele{intron}{$chr}{$str}{$x}}))[-1];
 		$b = (sort {$a<=>$b} keys(%{$elem{intron}{$chr}{$str}{$y}}))[0];
 		next unless($elem{intron}{$chr}{$str}{$a}{$b});
-		$inc = $data{$chr}{$str}{$a}{$x} + $data{$chr}{$str}{$y}{$b};
-		$exc = $data{$chr}{$str}{$a}{$b};
+		$inc = $data{$chr}{$str}{$a}{$x} + $data{$chr}{$str}{$y}{$b} + 0;
+		$exc = $data{$chr}{$str}{$a}{$b} + 0;
 		$psi  = frac($inc, 2*$exc);
-        	print join("\t", $chr, 'SJPIPE', 'exon', $x, $y, int(1000*$psi), $str, '.', set_attributes(psi=>$psi,inc=>$inc,exc=>$exc)), "\n";
+		next unless($psi =~ /\d/);
+        	print join("\t", $chr, 'SJPIPE', 'exon', $x, $y, int(1000*$psi), $str, '.', set_attributes(psicas=>$psi,inc=>$inc,exc=>$exc)), "\n";
 	    }
 	}
     }

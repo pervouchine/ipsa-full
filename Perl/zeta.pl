@@ -15,7 +15,7 @@ parse_command_line(annot    => {description=>'the annotation (GTF) file'},
 
 #######################################################################################################################
 
-# Read SJs from ssj bed file, memorize splice sites, and create index table
+# Read SJs from ssj bed file and memorize splice sites
 print STDERR "[<$ssj";
 open FILE, $ssj || die();
 while($line=<FILE>) {
@@ -26,6 +26,20 @@ while($line=<FILE>) {
     $site{$chr}{$str}{$beg} = 1;
     $site{$chr}{$str}{$end} = 1;
 }
+close FILE;
+if(-r $annot) {
+    print STDERR ",$annot";
+    open FILE, $annot;
+    while($line=<FILE>) {
+        chomp $line;
+        ($chr, $source, $feature, $beg, $end, $score, $s) = split /\t/, $line;
+	next unless($feature eq "exon");
+	$str = strand_c2i($s) * $stranded;
+	$site{$chr}{$str}{$beg} = 1;
+    	$site{$chr}{$str}{$end} = 1;
+    }
+    close FILE;
+}
 print STDERR ", indexing";
 foreach $chr(sort keys(%site)) {
     foreach $str(sort keys(%{$site{$chr}})) {
@@ -34,7 +48,6 @@ foreach $chr(sort keys(%site)) {
 	}
     }
 }
-close FILE;
 print STDERR ", n=$n]\n";
 
 #######################################################################################################################
@@ -49,21 +62,14 @@ if(-r $annot) {
     while($line=<FILE>) {
     	chomp $line;
     	($chr, $source, $feature, $beg, $end, $score, $s) = split /\t/, $line;
-    	if($feature eq "exon") {
-    	    $e = join("_", $chr, $beg, $end, $s);
-	    next if($been{$e}++);
-    	    $str = strand_c2i($s) * $stranded;
-    	    $l = $index{$chr}{$str}{$beg};
-    	    $r = $index{$chr}{$str}{$end};
-    	    push @{$lb[$l]}, $e;
-    	    push @{$rb[$r]}, $e;
-    	}
-#       if($feature eq "intron") {
-#            ($beg, $end) = reverse ($beg, $end) if($str<0);
-#            $count53{$chr}{$str}{$beg}{$end}=0;
-#            $count5X{$chr}{$str}{$beg}=0;
-#            $countX3{$chr}{$str}{$end}=0;
-#	}
+	next unless($feature eq "exon");
+    	$e = join("_", $chr, $beg, $end, $s);
+	next if($been{$e}++);
+    	$str = strand_c2i($s) * $stranded;
+    	$l = $index{$chr}{$str}{$beg};
+    	$r = $index{$chr}{$str}{$end};
+    	push @{$lb[$l]}, $e;
+    	push @{$rb[$r]}, $e;
     }
     close FILE;
     print STDERR "] ", 0+keys(%been), "\n";
@@ -150,7 +156,6 @@ if(-e $ssc) {
 print STDERR "[>stdout";
 for($j=1;$j<=$n;$j++) {
     foreach $e(@{$lb[$j]}) {
-	next unless($inclusion_r{$e} && $inclusion_l{$e});
 	$inc = $inclusion_l{$e} + $inclusion_r{$e} + 0;
 	$exc = $exclusion{$e} + 0;
 	$ret = $retention_l{$e} + $retention_r{$e} + 0;

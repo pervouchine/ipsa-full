@@ -26,6 +26,9 @@ parse_command_line(     in      => {description=>'the index file', ifabsent=>'in
 
 @group = split /\,/, $group;
 @smpid = split /\,/, $smpid;
+unless(@group*@smpid>0) {
+    die("group or smpid field are empty, exiting\n");
+}
 
 open FILE, $in || die("Can't read $in exiting\n");
 while($line=<FILE>) {
@@ -116,6 +119,7 @@ foreach $grp(keys(%IDR)) {
     make(script=>"awk", before=>"'\$\$4>=$entropy && \$\$7<$idr'", input=>{''=>fn($grp,A05,ssc,tsv)}, output=>{'>'=>fn($grp,A06,ssc,tsv)}, endpoint=>A06);
 
     make(script=>'tsv2bed.pl', input=>{'<'=>fn($grp,A06,ssj,tsv)}, output=>{'>'=>fn($grp,E06,ssj,bed)}, between=>"-extra 2,3,4,5,6,7", endpoint=>E06);
+    make(script=>'tsv2bed.pl', input=>{'<'=>fn($grp,A06,ssc,tsv)}, output=>{'>'=>fn($grp,E06,ssc,bed)}, between=>"-extra 2 -ssc", endpoint=>E06);
     make(script=>'tsv2gff.pl', input=>{'<'=>fn($grp,A06,ssj,tsv)}, output=>{'>'=>fn($grp,E06,ssj,gff)}, between=>"-o count 2 -o stagg 3 -o entr 4 -o annot 5 -o nucl 6 -o IDR 7", endpoint=>E06);
 
     $prm = "-mincount $mincount";
@@ -132,6 +136,8 @@ foreach $endpoint(keys(%merge_tsv)) {
 	make2(script=>"merge_tsv.pl", inputs=>{-i=>\%{$merge_tsv{$endpoint}{$arm}}}, outputs=>{''=>{'>'=>fn($merge,counts,$arm,tsv)}}, endpoint=>$endpoint);
     }
 }
+
+#make(script=>"psi_cassettes.pl", input=>{-annot=>$annot,-counts=>fn($merge,counts,ssj,tsv)}, output=>{'>'=>fn($merge,psicas,ssj,tsv)}, endpoint=>'all');
 
 foreach $endpoint(keys(%mk_stat)) { 
     foreach $arm(keys(%{$mk_stat{$endpoint}})) { 
