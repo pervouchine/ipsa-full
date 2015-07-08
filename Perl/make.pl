@@ -104,6 +104,7 @@ while($line=<FILE>) {
     }
 
     if($attr{'type'} eq "gff" || $attr{'type'} eq "gtf") { 
+	next if($been{$file}++);
         make(script=>"tx.pl", input=>{-quant=>$file, -annot=>$annot}, output=>{'>'=>fn($grp,C07,gff)}, endpoint=>C07);
 	$merge_gff{C}{psitx}{fn($grp,C07,gff)} = $grp;
     }
