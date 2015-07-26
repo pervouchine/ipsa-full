@@ -15,9 +15,6 @@ foreach $chr(keys(%{$data{exon}})) {
 		    foreach $b(keys(%{$data{intron}{$chr}{$str}{$y}})) {
 			next unless($data{intron}{$chr}{$str}{$a}{$b});
 			print join("_", $chr, $x, $y, $str), "\n";
-#			print join("_", $chr, $a, $x, $str), "\n";
-#			print join("_", $chr, $y, $b, $str), "\n";
-#			print join("_", $chr, $a, $b, $str), "\n";
 		    }
 		}
 	    }
