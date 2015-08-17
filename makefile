@@ -1,5 +1,5 @@
 DIR=example/
-MAPTOOLSDIR=maptools-2.0/
+MAPTOOLSDIR=maptools-3.2/
 SJCOUNTDIR=sjcount-full-3.1/
 
 ###############################################################################################
@@ -13,9 +13,9 @@ ${SJCOUNTDIR}sjcount :
 	make -C ${SJCOUNTDIR} all
 
 ${MAPTOOLSDIR}bin/transf ${MAPTOOLSDIR}bin/getsegm:
-	wget https://github.com/pervouchine/maptools/archive/v2.0.tar.gz -O v2.0.tar.gz
-	tar -xf v2.0.tar.gz 
-	rm -f v2.0.tar.gz
+	wget https://github.com/pervouchine/maptools/archive/v3.2.tar.gz -O v3.2.tar.gz
+	tar -xf v3.2.tar.gz 
+	rm -f v3.2.tar.gz
 	mkdir -p ${MAPTOOLSDIR}bin/
 	make -C ${MAPTOOLSDIR} all
 

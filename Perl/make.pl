@@ -7,7 +7,7 @@ if(@ARGV==0) {
     print STDERR "This utility creates a makefile for the sj pipeline, taking the index file from STDIN and printing the makefile to STDOUT\n";
 }
 
-parse_command_line(     in      => {description=>'the index file', ifabsent=>'index file not specified'},
+parse_command_line(     in      => {description=>'the index file'},
                         dir     => {description=>'the output directory', ifabsent=>'output directory not specified'},
                         repository => {description=>'the repository subdirectory for bam files'},
                         param   => {description=>'parameters passed to sjcount'},
@@ -22,7 +22,8 @@ parse_command_line(     in      => {description=>'the index file', ifabsent=>'in
                         annot   => {description=>'the annotation (gtf)', ifabsent=>'annotation not specified'},
                         genome  => {description=>'the genome (without .dbx or .idx)', ifabsent=>'genome not specified'},
                         merge   => {description=>'the name of the output to merge in case if blocks are missing', default=>"all"},
-                        SJCOUNTDIR =>{variable=>T,ifabsent=>'SJCOUNTDIR not specified'});
+                        SJCOUNTDIR =>{variable=>T,ifabsent=>'SJCOUNTDIR not specified'},
+			MAPTOOLSDIR=>{variable=>T,ifabsent=>'MAPTOOLSDIR not specified'});
 
 @group = split /\,/, $group;
 @smpid = split /\,/, $smpid;
@@ -30,8 +31,13 @@ unless(@group*@smpid>0) {
     die("group or smpid field are empty, exiting\n");
 }
 
-open FILE, $in || die("Can't read $in exiting\n");
-while($line=<FILE>) {
+if(-e -r $in) {
+    open $f, $in || die("Can't read $in exiting\n");
+} else  {
+    $f=*STDIN;
+}
+
+while($line=<$f>) {
     chomp $line;
     ($file, $attr) = split /\t/, $line;
     %attr = get_features($attr);
@@ -65,6 +71,10 @@ while($line=<FILE>) {
 
 	$PARAMS{'touch'}=>T;
 
+	if($attr{'genome'}) { 
+	    make(script=>"$MAPTOOLSDIR/bin/transf", input=>{-dir=>$attr{'genome'}}, output=>{-dbx=>fn($name,G01,genome,dbx), -idx=>fn($name,G01,genome,idx)}, after=>"-exactdir");
+	}
+
 	make(script=>$SJCOUNTDIR."sjcount", input=>{-bam=>$file}, output=>{-ssj=>fn($name,A01,ssj,tsv), -ssc=>fn($name,A01,ssc,tsv), -log=>fn($name,A01,ssj,'log')},
              after=>"-nbins $readLength $param $stranded -quiet", mkdir=>T, endpoint=>A01);
 
@@ -75,7 +85,10 @@ while($line=<FILE>) {
 
 	make(script=>"offset.r", input=>{-t=>fn($name,A02,ssj,'log')}, output=>{-p=>fn($name,A02,ssj,'pdf')}, endpoint=>QC1);
 
-	make(script=>"annotate.pl", input=>{-in=>fn($name,A02,ssj,tsv), -annot=>$annot, -dbx=>"$genome.dbx", -idx=>"$genome.idx"}, output=>{'>'=>fn($name,A03,ssj,tsv)}, after=>"-deltaSS $deltaSS", endpoint=>A03);
+	$gi = $attr{'genome'} ? fn($name,G01,genome,undef) : "$genome.";
+	$an = $attr{'annotation'} ? $attr{'annotation'} : $annot;
+
+	make(script=>"annotate.pl", input=>{-in=>fn($name,A02,ssj,tsv), -annot=>$an, -dbx=>$gi."dbx", -idx=>$gi."idx"}, output=>{'>'=>fn($name,A03,ssj,tsv)}, after=>"-deltaSS $deltaSS", endpoint=>A03);
 	make(script=>"choose_strand.pl", input=>{'<'=>fn($name,A03,ssj,tsv)}, output=>{'>'=>fn($name,A04,ssj,tsv), -logfile=>fn($name,A04,ssj,'log')}, before=>"-", endpoint=>A04);
 	make(script=>"constrain_ssc.pl", input=>{'<'=>fn($name,A02,ssc,tsv),-ssj=>fn($name,A04,ssj,tsv)}, output=>{'>'=>fn($name,A04,ssc,tsv)}, endpoint=>A04);	
 
@@ -90,6 +103,8 @@ while($line=<FILE>) {
 	push @{$IDR{$grp}{ssc}}, fn($name,A04,ssc,tsv);
 	push @{$IDR{$grp}{mex}}, fn($name,D03,tsv);
 
+        $merge_tsv{D}{met}{fn($name,D02,tsv)}     = $grp;
+
 	$merge_tsv{A}{ssj}{fn($grp,A06,ssj,tsv)} = $grp;
 	$merge_tsv{A}{ssc}{fn($grp,A06,ssc,tsv)} = $grp;
 	$merge_tsv{D}{mex}{fn($grp,D06,tsv)}     = $grp;
@@ -103,13 +118,13 @@ while($line=<FILE>) {
 	$merge_gff{B}{'psicas'}{fn($grp,B07,gff)} = $grp;
     }
 
-    if($attr{'type'} eq "gff" || $attr{'type'} eq "gtf") { 
+    if(($attr{'type'} eq "gff" || $attr{'type'} eq "gtf") && $attr{'view'} =~ /^Transcript/) { 
 	next if($been{$file}++);
-        make(script=>"tx.pl", input=>{-quant=>$file, -annot=>$annot}, output=>{'>'=>fn($grp,C07,gff)}, endpoint=>C07);
+        make(script=>"tx.pl", input=>{-quant=>$file, -annot=>$an}, output=>{'>'=>fn($grp,C07,gff)}, endpoint=>C07);
 	$merge_gff{C}{psitx}{fn($grp,C07,gff)} = $grp;
     }
 }
-close FILE;
+close $f;
 
 foreach $grp(keys(%IDR)) {
     make(script=>"idr4sj.pl", input=>{''=>join(" ", @{$IDR{$grp}{ssj}})}, output=>{'>'=>fn($grp,A05,ssj,tsv)}, endpoint=>A05);
@@ -124,9 +139,9 @@ foreach $grp(keys(%IDR)) {
     make(script=>'tsv2gff.pl', input=>{'<'=>fn($grp,A06,ssj,tsv)}, output=>{'>'=>fn($grp,E06,ssj,gff)}, between=>"-o count 2 -o stagg 3 -o entr 4 -o annot 5 -o nucl 6 -o IDR 7", endpoint=>E06);
 
     $prm = "-mincount $mincount";
-    make(script=>"zeta.pl", input=>{-ssj=>fn($grp,A06,ssj,tsv), -ssc=>fn($grp,A06,ssc,tsv), -annot=>$annot}, output=>{'>'=>fn($grp,A07,gff)}, between=>$prm, endpoint=>A07);
+    make(script=>"zeta.pl", input=>{-ssj=>fn($grp,A06,ssj,tsv), -ssc=>fn($grp,A06,ssc,tsv), -annot=>$an}, output=>{'>'=>fn($grp,A07,gff)}, between=>$prm, endpoint=>A07);
     make(script=>"zeta.pl", input=>{-ssj=>fn($grp,A06,ssj,tsv), -ssc=>fn($grp,A06,ssc,tsv), -exons=>fn($grp,D06,tsv)}, output=>{'>'=>fn($grp,D07,gff)}, between=>$prm, endpoint=>D07);
-    make(script=>"psicas.pl", input=>{-ssj=>fn($grp,A06,ssj,tsv), -annot=>$annot}, output=>{'>'=>fn($grp,B07,gff)}, endpoint=>B07);
+    make(script=>"psicas.pl", input=>{-ssj=>fn($grp,A06,ssj,tsv), -annot=>$an}, output=>{'>'=>fn($grp,B07,gff)}, endpoint=>B07);
 }
 
 #######################################################################################################################################################################
@@ -137,8 +152,6 @@ foreach $endpoint(keys(%merge_tsv)) {
 	make2(script=>"merge_tsv.pl", inputs=>{-i=>\%{$merge_tsv{$endpoint}{$arm}}}, outputs=>{''=>{'>'=>fn($merge,counts,$arm,tsv)}}, endpoint=>$endpoint);
     }
 }
-
-#make(script=>"psi_cassettes.pl", input=>{-annot=>$annot,-counts=>fn($merge,counts,ssj,tsv)}, output=>{'>'=>fn($merge,psicas,ssj,tsv)}, endpoint=>'all');
 
 foreach $endpoint(keys(%mk_stat)) { 
     foreach $arm(keys(%{$mk_stat{$endpoint}})) { 
