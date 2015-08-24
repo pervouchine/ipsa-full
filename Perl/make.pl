@@ -78,17 +78,23 @@ while($line=<$f>) {
 	make(script=>$SJCOUNTDIR."sjcount", input=>{-bam=>$file}, output=>{-ssj=>fn($name,A01,ssj,tsv), -ssc=>fn($name,A01,ssc,tsv), -log=>fn($name,A01,ssj,'log')},
              after=>"-nbins $readLength $param $stranded -quiet", mkdir=>T, endpoint=>A01);
 
+
 	$prm = "-readLength $readLength -margin $margin $param";
 	make(script=>"awk '\$\$2==1'",input=>{''=>fn($name,A01,ssj,tsv)}, output=>{'>'=>fn($name,A02,ssj,tsv), -logfile=>fn($name,A02,ssj,'log')}, between=>"|perl Perl/agg.pl $prm", endpoint=>A02);
         make(script=>"awk '\$\$2==0'",input=>{''=>fn($name,A01,ssc,tsv)}, output=>{'>'=>fn($name,A02,ssc,tsv), -logfile=>fn($name,A02,ssc,'log')}, between=>"|perl Perl/agg.pl $prm", endpoint=>A02);
 
+        $merge_r{A}{ssj}{offsetdist}{fn($name,A02,ssj,'log')} = $name;
+        $merge_r{A}{ssc}{offsetdist}{fn($name,A02,ssc,'log')} = $name;
 
-	make(script=>"offset.r", input=>{-t=>fn($name,A02,ssj,'log')}, output=>{-p=>fn($name,A02,ssj,'pdf')}, endpoint=>QC1);
+#	make(script=>"offset.r", input=>{-t=>fn($name,A02,ssj,'log')}, output=>{-p=>fn($name,A02,ssj,'pdf')}, endpoint=>QC1);
 
 	$gi = $attr{'genome'} ? fn($name,G01,genome,undef) : "$genome.";
 	$an = $attr{'annotation'} ? $attr{'annotation'} : $annot;
 
 	make(script=>"annotate.pl", input=>{-in=>fn($name,A02,ssj,tsv), -annot=>$an, -dbx=>$gi."dbx", -idx=>$gi."idx"}, output=>{'>'=>fn($name,A03,ssj,tsv)}, after=>"-deltaSS $deltaSS", endpoint=>A03);
+
+	$merge_r{A}{ssj}{disprop}{fn($name,A03,ssj,tsv)} = $name;
+
 	make(script=>"choose_strand.pl", input=>{'<'=>fn($name,A03,ssj,tsv)}, output=>{'>'=>fn($name,A04,ssj,tsv), -logfile=>fn($name,A04,ssj,'log')}, before=>"-", endpoint=>A04);
 	make(script=>"constrain_ssc.pl", input=>{'<'=>fn($name,A02,ssc,tsv),-ssj=>fn($name,A04,ssj,tsv)}, output=>{'>'=>fn($name,A04,ssc,tsv)}, endpoint=>A04);	
 
@@ -146,6 +152,15 @@ foreach $grp(keys(%IDR)) {
 
 #######################################################################################################################################################################
 
+foreach $endpoint(keys(%merge_r)) {
+    foreach $arm(keys(%{$merge_r{$endpoint}})) {
+	foreach $script(keys(%{$merge_r{$endpoint}{$arm}})) {
+	    make(script=>"$script.r", input=>{''=>join(" ", keys(%{$merge_r{$endpoint}{$arm}{$script}}))}, output=>{''=>fn($merge,$script,$arm,pdf)}, endpoint=>$endpoint);
+	}
+    }
+}
+
+#######################################################################################################################################################################
 
 foreach $endpoint(keys(%merge_tsv)) {
     foreach $arm(keys(%{$merge_tsv{$endpoint}})) {
@@ -172,7 +187,7 @@ foreach $endpoint(keys(%merge_gff)) {
 
 #######################################################################################################################################################################
 
-print "all :: A D stats\n";
+print "all :: A\n\#Type 'make -f makefile.mk endpoint' to execute other endpoints\n\# QC1 = offset ditribution\n\# QC2 = strand disproportion test\n";
 
 sub fn {
     return(@_[1]=~/^[A-Z]\d+$/ ? join(undef, $dir, @_[1], "/", join('.', @_)) : join(undef, $dir, join('.', @_)));
