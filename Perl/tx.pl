@@ -72,6 +72,7 @@ foreach $chr(keys(%exon)) {
 	for($i=0; $i<@{$loe{$chr}{$str}}; $i++) {
 	    $eid = join("_", $chr, @{$loe{$chr}{$str}->[$i]}, $str);
 	    $psi  = frac($inc{$eid}, $tot{$eid} - $inc{$eid});
+	    next unless($psi =~ /\d/);
 	    print join("\t", $chr, 'TXPIPE', 'exon', @{$loe{$chr}{$str}->[$i]}, int(1000*$psi), $str, '.', set_attributes(psitx=>$psi, inc=>$inc{$eid}, tot=>$tot{$eid})), "\n";
 	}	
     }

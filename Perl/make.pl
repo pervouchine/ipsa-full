@@ -83,17 +83,24 @@ while($line=<$f>) {
 	make(script=>"awk '\$\$2==1'",input=>{''=>fn($name,A01,ssj,tsv)}, output=>{'>'=>fn($name,A02,ssj,tsv), -logfile=>fn($name,A02,ssj,'log')}, between=>"|perl Perl/agg.pl $prm", endpoint=>A02);
         make(script=>"awk '\$\$2==0'",input=>{''=>fn($name,A01,ssc,tsv)}, output=>{'>'=>fn($name,A02,ssc,tsv), -logfile=>fn($name,A02,ssc,'log')}, between=>"|perl Perl/agg.pl $prm", endpoint=>A02);
 
-        $merge_r{A}{ssj}{offsetdist}{fn($name,A02,ssj,'log')} = $name;
-        $merge_r{A}{ssc}{offsetdist}{fn($name,A02,ssc,'log')} = $name;
+        $merge_r{QC1}{ssj}{offsetdist}{fn($name,A02,ssj,'log')} = $name;
+        $merge_r{QC1}{ssc}{offsetdist}{fn($name,A02,ssc,'log')} = $name;
 
 #	make(script=>"offset.r", input=>{-t=>fn($name,A02,ssj,'log')}, output=>{-p=>fn($name,A02,ssj,'pdf')}, endpoint=>QC1);
 
 	$gi = $attr{'genome'} ? fn($name,G01,genome,undef) : "$genome.";
+
 	$an = $attr{'annotation'} ? $attr{'annotation'} : $annot;
+	if($an=~/gtf$/) {
+	    $gfx = fn($name,A02,ann,gfx);
+	    make(script=>"transcript_elements.pl", input=>{'<'=>$an}, output=>{'>'=>$gfx},before=>"-");
+	    $an = $gfx;
+	}
+	$AN{$grp} = $an;
 
 	make(script=>"annotate.pl", input=>{-in=>fn($name,A02,ssj,tsv), -annot=>$an, -dbx=>$gi."dbx", -idx=>$gi."idx"}, output=>{'>'=>fn($name,A03,ssj,tsv)}, after=>"-deltaSS $deltaSS", endpoint=>A03);
 
-	$merge_r{A}{ssj}{disprop}{fn($name,A03,ssj,tsv)} = $name;
+	$merge_r{QC2}{ssj}{disprop}{fn($name,A03,ssj,tsv)} = $name;
 
 	make(script=>"choose_strand.pl", input=>{'<'=>fn($name,A03,ssj,tsv)}, output=>{'>'=>fn($name,A04,ssj,tsv), -logfile=>fn($name,A04,ssj,'log')}, before=>"-", endpoint=>A04);
 	make(script=>"constrain_ssc.pl", input=>{'<'=>fn($name,A02,ssc,tsv),-ssj=>fn($name,A04,ssj,tsv)}, output=>{'>'=>fn($name,A04,ssc,tsv)}, endpoint=>A04);	
@@ -101,7 +108,7 @@ while($line=<$f>) {
 	make(script=>"awk", before=>"'\$\$4>=$entropy && \$\$5>=$status'", input=>{''=>fn($name,A04,ssj,tsv)}, output=>{'>'=>fn($name,F04,ssj,tsv)}, endpoint=>F04);
 	$merge_tsv{F}{fsj}{fn($name,F04,ssj,tsv)} = $smp;
 
-        make(script=>"awk '\$\$2>=2'", input=>{''=>fn($name,A01,ssj,tsv)}, output=>{'>'=>fn($name,D01,tsv)}, between=>"| perl Perl/agg.pl -", endpoint=>D01);
+        make(script=>"awk '\$\$2==2'", input=>{''=>fn($name,A01,ssj,tsv)}, output=>{'>'=>fn($name,D01,tsv)}, between=>"| perl Perl/agg.pl -", endpoint=>D01);
 	make(script=>"constrain_mult.pl", input=>{-ssj=>fn($name,A04,ssj,tsv), '<'=>fn($name,D01,tsv)}, output=>{'>'=>fn($name,D02,tsv)}, endpoint=>D02);
 	make(script=>"extract_mex.pl", input=>{'<'=>fn($name,D02,tsv)}, output=>{'>'=>fn($name,D03,tsv)}, endpoint=>D03);
 
@@ -118,15 +125,16 @@ while($line=<$f>) {
 	$mk_stat{A}{ssj}{fn($grp,A06,ssj,tsv)} = $grp;
 
 	$merge_gff{A}{'psi,cosi'}{fn($grp,A07,gff)} = $grp;
+	$merge_gff{A}{'inc,exc'}{fn($grp,A07,gff)} = $grp;
 	$merge_gff{A}{'psi5,psi3'}{fn($grp,A07,gff)} = $grp;
 	$merge_gff{A}{'cosi5,cosi3'}{fn($grp,A07,gff)} = $grp;
 	$merge_gff{D}{'psi,cosi'}{fn($grp,D07,gff)} = $grp;
-	$merge_gff{B}{'psicas'}{fn($grp,B07,gff)} = $grp;
+	$merge_gff{B}{'psicas,psiloc'}{fn($grp,B07,gff)} = $grp;
     }
 
     if(($attr{'type'} eq "gff" || $attr{'type'} eq "gtf") && $attr{'view'} =~ /^Transcript/) { 
 	next if($been{$file}++);
-        make(script=>"tx.pl", input=>{-quant=>$file, -annot=>$an}, output=>{'>'=>fn($grp,C07,gff)}, endpoint=>C07);
+        make(script=>"tx.pl", input=>{-quant=>$file, -annot=>$an}, output=>{'>'=>fn($grp,C07,gff)}, between=>"-field RPKM1,RPKM2", endpoint=>C07);
 	$merge_gff{C}{psitx}{fn($grp,C07,gff)} = $grp;
     }
 }
@@ -145,7 +153,7 @@ foreach $grp(keys(%IDR)) {
     make(script=>'tsv2gff.pl', input=>{'<'=>fn($grp,A06,ssj,tsv)}, output=>{'>'=>fn($grp,E06,ssj,gff)}, between=>"-o count 2 -o stagg 3 -o entr 4 -o annot 5 -o nucl 6 -o IDR 7", endpoint=>E06);
 
     $prm = "-mincount $mincount";
-    make(script=>"zeta.pl", input=>{-ssj=>fn($grp,A06,ssj,tsv), -ssc=>fn($grp,A06,ssc,tsv), -annot=>$an}, output=>{'>'=>fn($grp,A07,gff)}, between=>$prm, endpoint=>A07);
+    make(script=>"zeta.pl", input=>{-ssj=>fn($grp,A06,ssj,tsv), -ssc=>fn($grp,A06,ssc,tsv), -annot=>$AN{$grp}}, output=>{'>'=>fn($grp,A07,gff)}, between=>$prm, endpoint=>A07);
     make(script=>"zeta.pl", input=>{-ssj=>fn($grp,A06,ssj,tsv), -ssc=>fn($grp,A06,ssc,tsv), -exons=>fn($grp,D06,tsv)}, output=>{'>'=>fn($grp,D07,gff)}, between=>$prm, endpoint=>D07);
     make(script=>"psicas.pl", input=>{-ssj=>fn($grp,A06,ssj,tsv), -annot=>$an}, output=>{'>'=>fn($grp,B07,gff)}, endpoint=>B07);
 }
@@ -187,7 +195,7 @@ foreach $endpoint(keys(%merge_gff)) {
 
 #######################################################################################################################################################################
 
-print "all :: A\n\#Type 'make -f makefile.mk endpoint' to execute other endpoints\n\# QC1 = offset ditribution\n\# QC2 = strand disproportion test\n";
+print "all :: A\n";
 
 sub fn {
     return(@_[1]=~/^[A-Z]\d+$/ ? join(undef, $dir, @_[1], "/", join('.', @_)) : join(undef, $dir, join('.', @_)));

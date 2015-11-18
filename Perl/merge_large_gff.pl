@@ -11,7 +11,7 @@ parse_command_line(dir    => {description=>'directory name', ifabsent=>'need dir
 		   f 	  => {description=>'feature'},
 		   subset => {description=>'file to subset id on'},
                    out    => {description=>'feature and output tsv file name', array=>hash},
-                   percent=> {description=>'do not report rows that have more than <value> NAs', default=>0.25});
+                   percent=> {description=>'do not report rows that have more than <value> NAs', default=>0});
 
 %output = @out;
 @group = split /\,/, $group;
