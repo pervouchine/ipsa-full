@@ -1,4 +1,5 @@
-use Perl::utils;
+use lib qw(/users/rg/dmitri/software/utils/);
+use utils;;
 $threshold = 10;
 $w = 10;
 

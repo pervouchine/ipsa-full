@@ -1,5 +1,6 @@
 #!/usr/bin/perl
-use Perl::utils;
+use lib qw(/users/rg/dmitri/software/utils/);
+use utils;;
 
 if(@ARGV==0) {
     print STDERR "This utility transforms tsv to bed (tsv is supplied at STDIN)\n";

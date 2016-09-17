@@ -1,5 +1,6 @@
 #!/usr/bin/perl
-use Perl::utils;
+use lib qw(/users/rg/dmitri/software/utils/);
+use utils;;
 
 if(@ARGV==0) {
     print STDERR "This utility computes splicing graph\n";

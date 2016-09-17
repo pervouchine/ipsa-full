@@ -19,12 +19,13 @@ colnames(df) = c('file','offset','count','freq')
 unlist(lapply(strsplit(as.character(df$file),"/"),function(x){x[length(x)]})) -> x
 gsub(".A02.ss[jc].log","", x) -> df$sample
 
-pdf(pdf,height=.2*length(cmd_args)+10,width=10)
-set_ggplot_theme <- function() {theme_set(theme_bw(base_size = 12))}
-p <- ggplot(df,aes(x=offset,y=count,colour=sample)) + geom_line() + geom_point() + ylab("number of reads")
+#pdf(pdf,height=.2*length(cmd_args)+10,width=10)
+pdf(pdf,height=7,width=10)
+theme_set(theme_bw(base_size = 14))
+p <- ggplot(subset(df,offset>0),aes(x=offset,y=count,colour=sample)) + geom_line() + geom_point() + ylab("number of reads")
 direct.label(p,"top.bumptwice")
 
-p <- ggplot(df,aes(x=offset,y=freq,colour=sample)) + geom_line() + geom_point() + ylab("proportion of reads, %")
+p <- ggplot(subset(df,offset>0),aes(x=offset,y=freq,colour=sample)) + geom_line() + geom_point() + ylab("proportion of reads, %") 
 direct.label(p,"top.bumptwice")
 
 dev.off()

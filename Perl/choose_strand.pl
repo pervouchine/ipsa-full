@@ -1,5 +1,6 @@
 #!/usr/bin/perl
-use Perl::utils;
+use lib qw(/users/rg/dmitri/software/utils/);
+use utils;;
 
 if(@ARGV==0) {
     print STDERR "This utility takes a TSV4+3+2 file (STDIN) where column (8) is the annotation status and column (9) is splice sites, and selects for each pair of beg/end the strand based on these two columns (STDOUT)\n";

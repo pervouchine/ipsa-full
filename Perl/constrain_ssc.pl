@@ -1,5 +1,6 @@
 #!/usr/bin/perl
-use Perl::utils;
+use lib qw(/users/rg/dmitri/software/utils/);
+use utils;;
 
 if(@ARGV==0) {
     print STDERR "This utility takes a BED6 ssc file (STDIN) and constraints its content to splice sites which are present in BED6 ssj file (STDOUT)\n";

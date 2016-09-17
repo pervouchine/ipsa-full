@@ -1,5 +1,6 @@
 #!/usr/bin/perl
-use Perl::utils;
+use lib qw(/users/rg/dmitri/software/utils/);
+use utils;;
 
 if(@ARGV==0) {
     print STDERR "This utility computes (a) the global exon inclusion and processing rates for a given set of annotated exons and (b) inclusion and processing rates of SJs\n";
@@ -7,8 +8,8 @@ if(@ARGV==0) {
 
 parse_command_line(annot    => {description=>'the annotation (GTF) file'},
 		   exons    => {description=>'exons file with exons to quantify'},
-                   ssj      => {description=>'the input ssj (BED) file', ifunreadable=>'input not specified'},
-                   ssc      => {description=>'the input ssc (BED) file'},
+                   ssj      => {description=>'the input ssj (tsv) file', ifunreadable=>'input not specified'},
+                   ssc      => {description=>'the input ssc (tsv) file'},
 		   mincount => {default=>10,  description=>'the min value of the denominator of the fraction'},
                    stranded => {default=>1,   description=>'1(yes) or 0(no)'}
                   );

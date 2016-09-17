@@ -1,5 +1,6 @@
 #!/usr/bin/perl
-use Perl::utils;
+use lib qw(/users/rg/dmitri/software/utils/);
+use utils;;
 
 if(@ARGV==0) {
     print STDERR "This utility merges gtf/gff files into rectangular tables with colnames\n";
@@ -8,7 +9,7 @@ if(@ARGV==0) {
 
 parse_command_line(i => {description=>'input gtf file name and label', array=>hash},
 		   o => {description=>'feature and output tsv file name', array=>hash},
-		   percent=>{description=>'do not report rows that have more than <value> NAs', default=>0.25},
+		   percent=>{description=>'do not report rows that have more than <value> NAs', default=>0},
 		   transf=>{description=>'transformation (log, logit)'});
 
 ################################################################################################################################

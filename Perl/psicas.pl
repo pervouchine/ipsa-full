@@ -1,6 +1,6 @@
 #!/usr/bin/perl
-use Perl::utils;
-
+use lib qw(/users/rg/dmitri/software/utils/);
+use utils;
 
 if(@ARGV==0) {
     print STDERR "This utility computes (a) the global exon inclusion and processing rates for a given set of annotated exons and (b) inclusion and processing rates of SJs\n";

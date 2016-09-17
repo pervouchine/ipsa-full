@@ -1,5 +1,6 @@
 #!/usr/bin/perl
-use Perl::utils;
+use lib qw(/users/rg/dmitri/software/utils/);
+use utils;;
 
 @suffixes = ('ssj','ssc');
 
@@ -195,7 +196,7 @@ foreach $endpoint(keys(%merge_gff)) {
 
 #######################################################################################################################################################################
 
-print "all :: A\n";
+print "all :: A D\n";
 
 sub fn {
     return(@_[1]=~/^[A-Z]\d+$/ ? join(undef, $dir, @_[1], "/", join('.', @_)) : join(undef, $dir, join('.', @_)));
